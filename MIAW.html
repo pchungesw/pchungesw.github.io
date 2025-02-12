@@ -18,9 +18,11 @@
 window.addEventListener("onEmbeddedMessagingConversationStarted", (event) => {
 	console.log("onEmbeddedMessagingConversationStarted event was fired.");
 	console.log(event.detail);
+});
 window.addEventListener("onEmbeddedMessagingPreChatLoaded", (event) => {
 	console.log("onEmbeddedMessagingPreChatLoaded event was fired.");
 	console.log(event.detail);
+});
 window.addEventListener("onEmbeddedMessageDelivered", (event) => {
 	console.log("onEmbeddedMessageDelivered event was fired.");
 	console.log(event.detail);
