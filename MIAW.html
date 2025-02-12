@@ -15,8 +15,9 @@
 	
 <script>document.getElementById('editThisPageLink').href = "https://github.com/ESW1234/esw1234.github.io/edit/master" + window.location.pathname;</script>
 
-<script>embedded_svc.addEventHandler("onEmbeddedMessagingConversationStarted", function(data) {
-  console.log{"onEmbeddedMessagingConversationStarted event was fired.  " + event.detail);</script>
+window.addEventListener("onEmbeddedMessagingConversationStarted", (event) => {
+  console.log{"onEmbeddedMessagingConversationStarted event was fired.  " + event.detail);
+});
 
 <!-- <script type='text/javascript' src='https://service.force.com/asyncclient/bootstrap.js'></script> -->
 
