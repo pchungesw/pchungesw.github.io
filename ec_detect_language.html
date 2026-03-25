@@ -27,8 +27,11 @@ window.addEventListener("onEmbeddedMessageDelivered", (event) => {
 	console.log(event.detail);
 });
 </script>
+  
+<!-- <script type='text/javascript' src='https://service.force.com/asyncclient/bootstrap.js'></script> -->
 
-<script>
+<script type='text/javascript'>
+
 // get browser language
 function getBrowserLanguage() {
   if (navigator.languages && navigator.languages.length > 0) {
@@ -59,11 +62,6 @@ function mapToSalesforceLanguage(browserLang) {
 //create variables
 const broswerLang = getBrowserLanguage();
 const sfLang = mapToSalesforceLanguage(browserLang);
-</script>
-  
-<!-- <script type='text/javascript' src='https://service.force.com/asyncclient/bootstrap.js'></script> -->
-
-<script type='text/javascript'>
 	function initEmbeddedMessaging() {
 		try {
 			embeddedservice_bootstrap.settings.language = sfLang; // For example, enter 'en' or 'en-US'
