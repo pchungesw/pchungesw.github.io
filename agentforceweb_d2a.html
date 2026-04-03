@@ -225,6 +225,8 @@
 	}
 
 	function savePrechatFields() {
+		console.log("Save button clicked!");
+
 		// Get values from form inputs
 		prechatValues._firstName = document.getElementById('firstName').value;
 		prechatValues._lastName = document.getElementById('lastName').value;
@@ -236,15 +238,25 @@
 		// Update pre-chat fields if the API is ready
 		if (typeof embeddedservice_bootstrap !== 'undefined' && embeddedservice_bootstrap.prechatAPI) {
 			try {
-				embeddedservice_bootstrap.prechatAPI.setVisiblePrechatFields(prechatValues)
-					.then(() => {
-						console.log("Pre-chat fields set successfully");
-						alert('Pre-chat fields updated successfully!');
-					})
-					.catch((error) => {
-						console.error("Error setting pre-chat fields:", error);
-						alert('Error updating pre-chat fields: ' + error.message);
-					});
+				const result = embeddedservice_bootstrap.prechatAPI.setVisiblePrechatFields(prechatValues);
+				console.log("setVisiblePrechatFields result:", result);
+
+				// Check if it returns a promise
+				if (result && typeof result.then === 'function') {
+					result
+						.then(() => {
+							console.log("Pre-chat fields set successfully (promise)");
+							alert('Pre-chat fields updated successfully!');
+						})
+						.catch((error) => {
+							console.error("Error setting pre-chat fields:", error);
+							alert('Error updating pre-chat fields: ' + error.message);
+						});
+				} else {
+					// It's synchronous
+					console.log("Pre-chat fields set successfully (synchronous)");
+					alert('Pre-chat fields updated successfully!');
+				}
 			} catch (error) {
 				console.error("Exception setting pre-chat fields:", error);
 				alert('Exception: ' + error.message);
