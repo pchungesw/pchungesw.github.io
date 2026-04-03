@@ -125,10 +125,22 @@
 <script type='text/javascript'>
 	// Store pre-chat field values
 	let prechatValues = {
-		_firstName: "Peter",
-		_lastName: "Chung",
-		_email: "pchung@salesforce.com",
-		_subject: "product question"
+		_firstName: {
+			value: "Peter",
+			isEditableByEndUser: true
+		},
+		_lastName: {
+			value: "Chung",
+			isEditableByEndUser: true
+		},
+		_email: {
+			value: "pchung@salesforce.com",
+			isEditableByEndUser: true
+		},
+		_subject: {
+			value: "product question",
+			isEditableByEndUser: true
+		}
 	};
 
 	function togglePanel() {
@@ -175,16 +187,6 @@
 
 	function startChat() {
 		if (typeof embeddedservice_bootstrap !== 'undefined' && embeddedservice_bootstrap.utilAPI) {
-			// Try to set pre-chat fields right before launching
-			if (embeddedservice_bootstrap.prechatAPI) {
-				console.log("Setting pre-chat fields before launch:", prechatValues);
-				try {
-					embeddedservice_bootstrap.prechatAPI.setVisiblePrechatFields(prechatValues);
-				} catch (e) {
-					console.error("Error setting fields before launch:", e);
-				}
-			}
-
 			embeddedservice_bootstrap.utilAPI.launchChat()
 				.then(() => {
 					console.log('Chat launched successfully');
@@ -238,10 +240,22 @@
 		console.log("Save button clicked!");
 
 		// Get values from form inputs
-		prechatValues._firstName = document.getElementById('firstName').value;
-		prechatValues._lastName = document.getElementById('lastName').value;
-		prechatValues._email = document.getElementById('email').value;
-		prechatValues._subject = document.getElementById('subject').value;
+		prechatValues._firstName = {
+			value: document.getElementById('firstName').value,
+			isEditableByEndUser: true
+		};
+		prechatValues._lastName = {
+			value: document.getElementById('lastName').value,
+			isEditableByEndUser: true
+		};
+		prechatValues._email = {
+			value: document.getElementById('email').value,
+			isEditableByEndUser: true
+		};
+		prechatValues._subject = {
+			value: document.getElementById('subject').value,
+			isEditableByEndUser: true
+		};
 
 		console.log("Attempting to set pre-chat fields:", prechatValues);
 		console.log("embeddedservice_bootstrap exists:", typeof embeddedservice_bootstrap !== 'undefined');
@@ -288,10 +302,6 @@
 	function initEmbeddedMessaging() {
 		try {
 			embeddedservice_bootstrap.settings.language = 'en_US'; // For example, enter 'en' or 'en-US'
-
-			// Try setting pre-chat values in settings
-			embeddedservice_bootstrap.settings.prepopulatedPrechatFields = prechatValues;
-			console.log("Set prepopulatedPrechatFields in settings:", prechatValues);
 
 			embeddedservice_bootstrap.init(
 				'00DWs00000CvEVZ',
