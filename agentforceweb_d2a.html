@@ -244,17 +244,6 @@
 		try {
 			embeddedservice_bootstrap.settings.language = 'en_US'; // For example, enter 'en' or 'en-US'
 
-			// Listen for when the Embedded Messaging API is ready
-			window.addEventListener("onEmbeddedMessagingReady", () => {
-				console.log("Embedded Messaging API is ready");
-
-				// Populate pre-chat fields with current values
-				embeddedservice_bootstrap.prechatAPI.setVisiblePrechatFields(prechatValues);
-
-				// Show the Start Chat button
-				document.getElementById('startChatBtn').style.display = 'inline-block';
-			});
-
 			embeddedservice_bootstrap.init(
 				'00DWs00000CvEVZ',
 				'MIAW_Direct_to_Service_Rep',
@@ -267,6 +256,31 @@
 			console.error('Error loading Embedded Messaging: ', err);
 		}
 	};
+
+	// Listen for when the Embedded Messaging API is ready
+	window.addEventListener("onEmbeddedMessagingReady", () => {
+		console.log("Embedded Messaging API is ready");
+		console.log("embeddedservice_bootstrap object:", embeddedservice_bootstrap);
+		console.log("prechatAPI available:", embeddedservice_bootstrap.prechatAPI);
+
+		// Give the API a moment to fully initialize
+		setTimeout(() => {
+			// Populate pre-chat fields with current values
+			if (embeddedservice_bootstrap.prechatAPI) {
+				try {
+					embeddedservice_bootstrap.prechatAPI.setVisiblePrechatFields(prechatValues);
+					console.log("Pre-chat fields set:", prechatValues);
+				} catch (error) {
+					console.error("Error setting pre-chat fields:", error);
+				}
+			} else {
+				console.error("prechatAPI is not available");
+			}
+
+			// Show the Start Chat button
+			document.getElementById('startChatBtn').style.display = 'inline-block';
+		}, 500);
+	});
 </script>
 <script type='text/javascript' src='https://agentforceweb.demo.my.site.com/ESWMIAWDirecttoService1749749039230/assets/js/bootstrap.min.js' onload='initEmbeddedMessaging()'></script>
 
