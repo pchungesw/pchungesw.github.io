@@ -289,11 +289,9 @@
 		try {
 			embeddedservice_bootstrap.settings.language = 'en_US'; // For example, enter 'en' or 'en-US'
 
-			// Set pre-chat fields BEFORE initialization
-			if (embeddedservice_bootstrap.prechatAPI) {
-				console.log("Setting pre-chat fields before init:", prechatValues);
-				embeddedservice_bootstrap.prechatAPI.setVisiblePrechatFields(prechatValues);
-			}
+			// Try setting pre-chat values in settings
+			embeddedservice_bootstrap.settings.prepopulatedPrechatFields = prechatValues;
+			console.log("Set prepopulatedPrechatFields in settings:", prechatValues);
 
 			embeddedservice_bootstrap.init(
 				'00DWs00000CvEVZ',
@@ -311,6 +309,16 @@
 	// Listen for when the Embedded Messaging API is ready
 	window.addEventListener("onEmbeddedMessagingReady", () => {
 		console.log("Embedded Messaging API is ready");
+
+		// Try setting via prechatAPI as well
+		if (embeddedservice_bootstrap.prechatAPI) {
+			try {
+				embeddedservice_bootstrap.prechatAPI.setVisiblePrechatFields(prechatValues);
+				console.log("Pre-chat fields also set via prechatAPI:", prechatValues);
+			} catch (error) {
+				console.error("Error with prechatAPI:", error);
+			}
+		}
 
 		// Show the Start Chat button
 		document.getElementById('startChatBtn').style.display = 'inline-block';
