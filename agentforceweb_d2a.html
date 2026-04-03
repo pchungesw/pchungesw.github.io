@@ -231,11 +231,26 @@
 		prechatValues._email = document.getElementById('email').value;
 		prechatValues._subject = document.getElementById('subject').value;
 
+		console.log("Attempting to set pre-chat fields:", prechatValues);
+
 		// Update pre-chat fields if the API is ready
 		if (typeof embeddedservice_bootstrap !== 'undefined' && embeddedservice_bootstrap.prechatAPI) {
-			embeddedservice_bootstrap.prechatAPI.setVisiblePrechatFields(prechatValues);
-			alert('Pre-chat fields updated successfully!');
+			try {
+				embeddedservice_bootstrap.prechatAPI.setVisiblePrechatFields(prechatValues)
+					.then(() => {
+						console.log("Pre-chat fields set successfully");
+						alert('Pre-chat fields updated successfully!');
+					})
+					.catch((error) => {
+						console.error("Error setting pre-chat fields:", error);
+						alert('Error updating pre-chat fields: ' + error.message);
+					});
+			} catch (error) {
+				console.error("Exception setting pre-chat fields:", error);
+				alert('Exception: ' + error.message);
+			}
 		} else {
+			console.warn("Embedded Messaging API not ready yet");
 			alert('Pre-chat fields will be applied when chat loads.');
 		}
 	}
