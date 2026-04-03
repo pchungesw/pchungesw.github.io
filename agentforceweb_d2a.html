@@ -1,0 +1,367 @@
+<html>
+  <style>
+		body {
+			padding: 2rem;
+			overflow-x: hidden;
+		}
+		.page-header {
+			text-align: center;
+			margin-bottom: 2rem;
+		}
+		.slide-panel {
+			position: fixed;
+			left: -600px;
+			top: 0;
+			width: 600px;
+			height: 100vh;
+			background: #fff;
+			box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+			transition: left 0.3s ease-in-out;
+			z-index: 1000;
+			padding: 2rem;
+			overflow-y: auto;
+		}
+		.slide-panel.open {
+			left: 0;
+		}
+		.toggle-btn {
+			position: fixed;
+			left: 20px;
+			top: 20px;
+			z-index: 999;
+		}
+		.slide-panel.open ~ .toggle-btn {
+			left: 620px;
+		}
+		.info-table {
+			width: 100%;
+			border-collapse: collapse;
+		}
+		.info-table td {
+			padding: 0.5rem 0;
+			border: none;
+		}
+		.info-table td:first-child {
+			font-weight: bold;
+			width: 40%;
+		}
+		.toggle-section {
+			margin-top: 2rem;
+			padding-top: 1rem;
+			border-top: 1px solid #dddbda;
+		}
+		.collapsible-section {
+			margin-top: 1.5rem;
+			border-top: 1px solid #ddd;
+			padding-top: 1rem;
+		}
+		.collapsible-section:first-of-type {
+			margin-top: 1rem;
+		}
+		.collapsible-header {
+			cursor: pointer;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 0.5rem 0;
+		}
+		.collapsible-header:hover {
+			background-color: #f3f3f3;
+		}
+		.collapsible-content {
+			display: none;
+			padding-top: 1rem;
+		}
+		.collapsible-content.open {
+			display: block;
+		}
+		.form-field {
+			margin-bottom: 1rem;
+		}
+		.form-field label {
+			display: block;
+			font-weight: bold;
+			margin-bottom: 0.25rem;
+			font-size: 0.875rem;
+		}
+		.form-field input {
+			width: 100%;
+			padding: 0.5rem;
+			border: 1px solid #ccc;
+			border-radius: 4px;
+		}
+	</style>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, user-scalable=0">
+<title>Neat Stuff MIAW Demo - Direct to Agent</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@salesforce-ux/design-system@2.22.2/assets/styles/salesforce-lightning-design-system.min.css">
+</head>
+<body class="slds-scope">
+
+<div class="slide-panel" id="slidePanel">
+	<h2 class="slds-text-heading_medium">Page Settings</h2>
+	<div class="collapsible-section">
+		<div class="collapsible-header" onclick="toggleCollapsibleSection('configContent', 'configIcon')">
+			<h3 class="slds-text-heading_small">Configuration Details</h3>
+			<span id="configIcon">▼</span>
+		</div>
+		<div class="collapsible-content" id="configContent">
+		<table class="info-table">
+			<tr>
+				<td class="slds-text-body_small slds-text-color_weak">Org Name:</td>
+				<td class="slds-text-body_regular">Agentforceweb</td>
+			</tr>
+			<tr>
+				<td class="slds-text-body_small slds-text-color_weak">Org ID:</td>
+				<td class="slds-text-body_regular">00DWs00000CvEVZ</td>
+			</tr>
+			<tr>
+				<td class="slds-text-body_small slds-text-color_weak">Embedded Service Name:</td>
+				<td class="slds-text-body_regular">
+					<a href="https://agentforceweb.demo.my.salesforce-setup.com/lightning/setup/EmbeddedServiceDeployments/04IWs000000CeCzMAK/view" target="_blank" class="slds-text-link">MIAW-Direct to Service Rep</a>
+				</td>
+			</tr>
+			<tr>
+				<td class="slds-text-body_small slds-text-color_weak">Messaging Channel:</td>
+				<td class="slds-text-body_regular">
+					MIAW - Direct to Service Rep
+					(<a href="https://agentforceweb.demo.my.salesforce-setup.com/lightning/setup/LiveMessageSetup/0MjWs000001FdOfKAK/view?lightning__channelType=" target="_blank" class="slds-text-link">view</a> |
+					<a href="https://agentforceweb.demo.my.salesforce-setup.com/lightning/setup/LiveMessageSetup/0MjWs000001FdOfKAK/view?lightning__channelType=EmbeddedMessaging" target="_blank" class="slds-text-link">edit</a>)
+				</td>
+			</tr>
+			<tr>
+				<td class="slds-text-body_small slds-text-color_weak">Routing Type:</td>
+				<td class="slds-text-body_regular">
+					<a href="https://agentforceweb.demo.lightning.force.com/builder_platform_interaction/flowBuilder.app?flowId=301Ws00004BkB4wIAF" target="_blank" class="slds-text-link">Flow - SDO Service - MIAW Omni Flow</a>
+				</td>
+			</tr>
+			<tr>
+				<td class="slds-text-body_small slds-text-color_weak">Github Page:</td>
+				<td class="slds-text-body_regular">
+					<a href="https://github.com/pchungesw/pchungesw.github.io/blob/main/agentforceweb_d2a.html" target="_blank" class="slds-text-link">click here</a>
+				</td>
+			</tr>
+		</table>
+		</div>
+	</div>
+
+	<div class="collapsible-section">
+		<div class="collapsible-header" onclick="toggleCollapsibleSection('prechatContent', 'prechatIcon')">
+			<h3 class="slds-text-heading_small">Pre-Chat Population</h3>
+			<span id="prechatIcon">▼</span>
+		</div>
+		<div class="collapsible-content" id="prechatContent">
+			<div class="form-field">
+				<label for="firstName">First Name:</label>
+				<input type="text" id="firstName" value="Peter" class="slds-input">
+			</div>
+			<div class="form-field">
+				<label for="lastName">Last Name:</label>
+				<input type="text" id="lastName" value="Chung" class="slds-input">
+			</div>
+			<div class="form-field">
+				<label for="email">Email:</label>
+				<input type="email" id="email" value="pchung@salesforce.com" class="slds-input">
+			</div>
+			<div class="form-field">
+				<label for="subject">Subject:</label>
+				<input type="text" id="subject" value="product question" class="slds-input">
+			</div>
+			<button class="slds-button slds-button_brand" onclick="savePrechatFields()">Save</button>
+		</div>
+	</div>
+
+	<div class="collapsible-section">
+		<div class="collapsible-header" onclick="toggleCollapsibleSection('chatButtonContent', 'chatButtonIcon')">
+			<h3 class="slds-text-heading_small">Chat Button Visibility</h3>
+			<span id="chatButtonIcon">▼</span>
+		</div>
+		<div class="collapsible-content" id="chatButtonContent">
+			<div class="slds-form-element">
+				<label class="slds-checkbox_toggle slds-grid">
+					<span class="slds-form-element__label slds-m-bottom_none">Show Chat Button</span>
+					<input type="checkbox" id="chatButtonToggle" onchange="toggleChatButton()" checked />
+					<span id="chatButtonToggle-label" class="slds-checkbox_faux_container" aria-live="assertive">
+						<span class="slds-checkbox_faux"></span>
+						<span class="slds-checkbox_on">Visible</span>
+						<span class="slds-checkbox_off">Hidden</span>
+					</span>
+				</label>
+			</div>
+		</div>
+	</div>
+</div>
+
+<button class="toggle-btn slds-button slds-button_brand" onclick="togglePanel()">
+	☰ Menu
+</button>
+
+<div class="page-header">
+	<h1 class="slds-text-heading_large">Enhanced Chat v1</h1>
+</div>
+
+<div style="max-width: 600px; margin: 2rem auto; text-align: center;">
+	<div style="display: flex; gap: 0.5rem; justify-content: center;">
+		<input type="text" id="searchInput" placeholder="Search for products..." class="slds-input" style="flex: 1; max-width: 400px;" onkeypress="if(event.key === 'Enter') handleSearch()">
+		<button class="slds-button slds-button_neutral" onclick="handleSearch()">Search</button>
+	</div>
+</div>
+
+<div style="text-align: center; margin-top: 2rem;">
+	<button id="startChatBtn" class="slds-button slds-button_brand" onclick="startChat()" style="display: none;">Start Chat</button>
+</div>
+
+<!-- <script type='text/javascript' src='https://service.force.com/asyncclient/bootstrap.js'></script> -->
+
+<script type='text/javascript'>
+	// Store pre-chat field values
+	let prechatValues = {
+		_firstName: "Peter",
+		_lastName: "Chung",
+		_email: "pchung@salesforce.com",
+		_subject: "product question"
+	};
+
+	function togglePanel() {
+		const panel = document.getElementById('slidePanel');
+		panel.classList.toggle('open');
+	}
+
+	function toggleCollapsibleSection(contentId, iconId) {
+		const content = document.getElementById(contentId);
+		const icon = document.getElementById(iconId);
+		content.classList.toggle('open');
+		icon.textContent = content.classList.contains('open') ? '▲' : '▼';
+	}
+
+	function handleSearch() {
+		const searchQuery = document.getElementById('searchInput').value;
+
+		if (!searchQuery.trim()) {
+			alert('Please enter a search query');
+			return;
+		}
+
+		// Set session context with the search query
+		if (typeof embeddedservice_bootstrap !== 'undefined' && embeddedservice_bootstrap.utilAPI) {
+			embeddedservice_bootstrap.utilAPI.setSessionContext({
+				search: searchQuery
+			})
+				.then(() => {
+					console.log('Session context set with search:', searchQuery);
+					alert('Search context set: "' + searchQuery + '"\nYou can now start a chat and the agent will see your search query.');
+				})
+				.catch((error) => {
+					console.error('Failed to set session context:', error);
+					alert('Unable to set search context.');
+				})
+				.finally(() => {
+					console.log('Set session context attempt completed');
+				});
+		} else {
+			console.error('Embedded Messaging is not yet loaded');
+			alert('Chat is not ready yet. Please wait a moment and try again.');
+		}
+	}
+
+	function startChat() {
+		if (typeof embeddedservice_bootstrap !== 'undefined' && embeddedservice_bootstrap.utilAPI) {
+			embeddedservice_bootstrap.utilAPI.launchChat()
+				.then(() => {
+					console.log('Chat launched successfully');
+				})
+				.catch((error) => {
+					console.error('Failed to launch chat:', error);
+					alert('Unable to start chat. Please try again.');
+				})
+				.finally(() => {
+					console.log('Launch chat attempt completed');
+				});
+		} else {
+			console.error('Embedded Messaging is not yet loaded');
+			alert('Chat is not ready yet. Please wait a moment and try again.');
+		}
+	}
+
+	function toggleChatButton() {
+		const isChecked = document.getElementById('chatButtonToggle').checked;
+
+		if (typeof embeddedservice_bootstrap !== 'undefined' && embeddedservice_bootstrap.utilAPI) {
+			if (isChecked) {
+				embeddedservice_bootstrap.utilAPI.showChatButton()
+					.then(() => {
+						console.log('Chat button shown successfully');
+					})
+					.catch((error) => {
+						console.error('Failed to show chat button:', error);
+						alert('Unable to show chat button. Make sure chat window is not open.');
+						document.getElementById('chatButtonToggle').checked = false;
+					});
+			} else {
+				embeddedservice_bootstrap.utilAPI.hideChatButton()
+					.then(() => {
+						console.log('Chat button hidden successfully');
+					})
+					.catch((error) => {
+						console.error('Failed to hide chat button:', error);
+						alert('Unable to hide chat button. Make sure chat window is not open.');
+						document.getElementById('chatButtonToggle').checked = true;
+					});
+			}
+		} else {
+			console.error('Embedded Messaging is not yet loaded');
+			alert('Chat is not ready yet. Please wait a moment and try again.');
+			document.getElementById('chatButtonToggle').checked = !isChecked;
+		}
+	}
+
+	function savePrechatFields() {
+		// Get values from form inputs
+		prechatValues._firstName = document.getElementById('firstName').value;
+		prechatValues._lastName = document.getElementById('lastName').value;
+		prechatValues._email = document.getElementById('email').value;
+		prechatValues._subject = document.getElementById('subject').value;
+
+		// Update pre-chat fields if the API is ready
+		if (typeof embeddedservice_bootstrap !== 'undefined' && embeddedservice_bootstrap.prechatAPI) {
+			embeddedservice_bootstrap.prechatAPI.setVisiblePrechatFields(prechatValues);
+			alert('Pre-chat fields updated successfully!');
+		} else {
+			alert('Pre-chat fields will be applied when chat loads.');
+		}
+	}
+
+	function initEmbeddedMessaging() {
+		try {
+			embeddedservice_bootstrap.settings.language = 'en_US'; // For example, enter 'en' or 'en-US'
+
+			// Listen for when the Embedded Messaging API is ready
+			window.addEventListener("onEmbeddedMessagingReady", () => {
+				console.log("Embedded Messaging API is ready");
+
+				// Populate pre-chat fields with current values
+				embeddedservice_bootstrap.prechatAPI.setVisiblePrechatFields(prechatValues);
+
+				// Show the Start Chat button
+				document.getElementById('startChatBtn').style.display = 'inline-block';
+			});
+
+			embeddedservice_bootstrap.init(
+				'00DWs00000CvEVZ',
+				'MIAW_Direct_to_Service_Rep',
+				'https://agentforceweb.demo.my.site.com/ESWMIAWDirecttoService1749749039230',
+				{
+					scrt2URL: 'https://agentforceweb.demo.my.salesforce-scrt.com'
+				}
+			);
+		} catch (err) {
+			console.error('Error loading Embedded Messaging: ', err);
+		}
+	};
+</script>
+<script type='text/javascript' src='https://agentforceweb.demo.my.site.com/ESWMIAWDirecttoService1749749039230/assets/js/bootstrap.min.js' onload='initEmbeddedMessaging()'></script>
+
+
+
+</body>
+</html>
