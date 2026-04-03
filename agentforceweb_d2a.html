@@ -175,6 +175,16 @@
 
 	function startChat() {
 		if (typeof embeddedservice_bootstrap !== 'undefined' && embeddedservice_bootstrap.utilAPI) {
+			// Try to set pre-chat fields right before launching
+			if (embeddedservice_bootstrap.prechatAPI) {
+				console.log("Setting pre-chat fields before launch:", prechatValues);
+				try {
+					embeddedservice_bootstrap.prechatAPI.setVisiblePrechatFields(prechatValues);
+				} catch (e) {
+					console.error("Error setting fields before launch:", e);
+				}
+			}
+
 			embeddedservice_bootstrap.utilAPI.launchChat()
 				.then(() => {
 					console.log('Chat launched successfully');
