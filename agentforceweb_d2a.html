@@ -234,12 +234,16 @@
 		prechatValues._subject = document.getElementById('subject').value;
 
 		console.log("Attempting to set pre-chat fields:", prechatValues);
+		console.log("embeddedservice_bootstrap exists:", typeof embeddedservice_bootstrap !== 'undefined');
+		console.log("prechatAPI exists:", embeddedservice_bootstrap && embeddedservice_bootstrap.prechatAPI);
 
 		// Update pre-chat fields if the API is ready
 		if (typeof embeddedservice_bootstrap !== 'undefined' && embeddedservice_bootstrap.prechatAPI) {
 			try {
+				console.log("About to call setVisiblePrechatFields...");
 				const result = embeddedservice_bootstrap.prechatAPI.setVisiblePrechatFields(prechatValues);
-				console.log("setVisiblePrechatFields result:", result);
+				console.log("setVisiblePrechatFields returned:", result);
+				console.log("Result type:", typeof result);
 
 				// Check if it returns a promise
 				if (result && typeof result.then === 'function') {
@@ -250,7 +254,7 @@
 						})
 						.catch((error) => {
 							console.error("Error setting pre-chat fields:", error);
-							alert('Error updating pre-chat fields: ' + error.message);
+							alert('Error updating pre-chat fields: ' + (error ? error.message : 'Unknown error'));
 						});
 				} else {
 					// It's synchronous
@@ -258,8 +262,12 @@
 					alert('Pre-chat fields updated successfully!');
 				}
 			} catch (error) {
-				console.error("Exception setting pre-chat fields:", error);
-				alert('Exception: ' + error.message);
+				console.error("Exception caught:", error);
+				console.error("Error type:", typeof error);
+				console.error("Error string:", String(error));
+				console.error("Error message:", error ? error.message : 'no message');
+				console.error("Full error object:", JSON.stringify(error, Object.getOwnPropertyNames(error)));
+				alert('Exception: ' + (error && error.message ? error.message : String(error)));
 			}
 		} else {
 			console.warn("Embedded Messaging API not ready yet");
