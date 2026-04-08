@@ -120,6 +120,13 @@
 	<button id="startChatBtn" class="slds-button slds-button_brand" onclick="startChat()" style="display: none;">Start Chat</button>
 </div>
 
+<div style="max-width: 800px; margin: 2rem auto;">
+	<h2 class="slds-text-heading_medium" style="margin-bottom: 1rem;">Event Log</h2>
+	<div id="eventLog" style="border: 1px solid #d8dde6; border-radius: 4px; background-color: #f3f3f3; padding: 1rem; height: 400px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 12px;">
+		<div style="color: #706e6b;">Waiting for events...</div>
+	</div>
+</div>
+
 <!-- <script type='text/javascript' src='https://service.force.com/asyncclient/bootstrap.js'></script> -->
 
 <script type='text/javascript'>
@@ -142,6 +149,41 @@
 			isEditableByEndUser: true
 		}
 	};
+
+	const MAX_LOG_ENTRIES = 50;
+
+	function logEvent(eventName, eventDetail) {
+		const eventLog = document.getElementById('eventLog');
+		const timestamp = new Date().toLocaleTimeString();
+
+		// Clear the "Waiting for events..." message on first event
+		if (eventLog.children.length === 1 && eventLog.children[0].textContent === 'Waiting for events...') {
+			eventLog.innerHTML = '';
+		}
+
+		// Create new log entry
+		const logEntry = document.createElement('div');
+		logEntry.style.marginBottom = '0.5rem';
+		logEntry.style.paddingBottom = '0.5rem';
+		logEntry.style.borderBottom = '1px solid #d8dde6';
+
+		const detailStr = eventDetail && Object.keys(eventDetail).length > 0
+			? JSON.stringify(eventDetail, null, 2)
+			: '{}';
+
+		logEntry.innerHTML = `<span style="color: #0176d3; font-weight: bold;">[${timestamp}]</span> <span style="color: #080707;">${eventName}</span><br><span style="color: #706e6b; margin-left: 1rem;">${detailStr}</span>`;
+
+		// Add to log
+		eventLog.appendChild(logEntry);
+
+		// Remove oldest entry if we exceed max entries
+		if (eventLog.children.length > MAX_LOG_ENTRIES) {
+			eventLog.removeChild(eventLog.firstChild);
+		}
+
+		// Auto-scroll to bottom
+		eventLog.scrollTop = eventLog.scrollHeight;
+	}
 
 	function togglePanel() {
 		const panel = document.getElementById('slidePanel');
@@ -319,6 +361,7 @@
 	// Listen for when the Embedded Messaging API is ready
 	window.addEventListener("onEmbeddedMessagingReady", () => {
 		console.log("Embedded Messaging API is ready");
+		logEvent("onEmbeddedMessagingReady", {});
 
 		// Try setting via prechatAPI as well
 		if (embeddedservice_bootstrap.prechatAPI) {
@@ -332,6 +375,155 @@
 
 		// Show the Start Chat button
 		document.getElementById('startChatBtn').style.display = 'inline-block';
+	});
+
+	// Conversation Status Events
+	window.addEventListener("onEmbeddedMessagingConversationStarted", (event) => {
+		console.log("Conversation Started:", event.detail);
+		logEvent("onEmbeddedMessagingConversationStarted", event.detail);
+	});
+
+	window.addEventListener("onEmbeddedMessagingConversationOpened", (event) => {
+		console.log("Conversation Opened:", event.detail);
+		logEvent("onEmbeddedMessagingConversationOpened", event.detail);
+	});
+
+	window.addEventListener("onEmbeddedMessagingConversationClosed", (event) => {
+		console.log("Conversation Closed:", event.detail);
+		logEvent("onEmbeddedMessagingConversationClosed", event.detail);
+	});
+
+	window.addEventListener("onEmbeddedMessagingSessionStatusUpdate", (event) => {
+		console.log("Session Status Update:", event.detail);
+		logEvent("onEmbeddedMessagingSessionStatusUpdate", event.detail);
+	});
+
+	// Business Hours Events
+	window.addEventListener("onEmbeddedMessagingWithinBusinessHours", (event) => {
+		console.log("Within Business Hours:", event.detail);
+		logEvent("onEmbeddedMessagingWithinBusinessHours", event.detail);
+	});
+
+	window.addEventListener("onEmbeddedMessagingBusinessHoursStarted", (event) => {
+		console.log("Business Hours Started:", event.detail);
+		logEvent("onEmbeddedMessagingBusinessHoursStarted", event.detail);
+	});
+
+	window.addEventListener("onEmbeddedMessagingBusinessHoursEnded", (event) => {
+		console.log("Business Hours Ended:", event.detail);
+		logEvent("onEmbeddedMessagingBusinessHoursEnded", event.detail);
+	});
+
+	// Button & Window Events
+	window.addEventListener("onEmbeddedMessagingButtonCreated", (event) => {
+		console.log("Chat Button Created:", event.detail);
+		logEvent("onEmbeddedMessagingButtonCreated", event.detail);
+	});
+
+	window.addEventListener("onEmbeddedMessagingButtonClicked", (event) => {
+		console.log("Chat Button Clicked:", event.detail);
+		logEvent("onEmbeddedMessagingButtonClicked", event.detail);
+	});
+
+	window.addEventListener("onEmbeddedMessagingWindowClosed", (event) => {
+		console.log("Chat Window Closed:", event.detail);
+		logEvent("onEmbeddedMessagingWindowClosed", event.detail);
+	});
+
+	window.addEventListener("onEmbeddedMessagingWindowMinimized", (event) => {
+		console.log("Chat Window Minimized:", event.detail);
+		logEvent("onEmbeddedMessagingWindowMinimized", event.detail);
+	});
+
+	window.addEventListener("onEmbeddedMessagingWindowMaximized", (event) => {
+		console.log("Chat Window Maximized:", event.detail);
+		logEvent("onEmbeddedMessagingWindowMaximized", event.detail);
+	});
+
+	// Message Events
+	window.addEventListener("onEmbeddedMessageSent", (event) => {
+		console.log("Message Sent:", event.detail);
+		logEvent("onEmbeddedMessageSent", event.detail);
+	});
+
+	window.addEventListener("onEmbeddedMessageDelivered", (event) => {
+		console.log("Message Delivered:", event.detail);
+		logEvent("onEmbeddedMessageDelivered", event.detail);
+	});
+
+	window.addEventListener("onEmbeddedMessageRead", (event) => {
+		console.log("Message Read:", event.detail);
+		logEvent("onEmbeddedMessageRead", event.detail);
+	});
+
+	window.addEventListener("onEmbeddedMessageLinkClicked", (event) => {
+		console.log("Message Link Clicked:", event.detail);
+		logEvent("onEmbeddedMessageLinkClicked", event.detail);
+	});
+
+	// Routing & Participant Events
+	window.addEventListener("onEmbeddedMessagingConversationRouted", (event) => {
+		console.log("Conversation Routed:", event.detail);
+		logEvent("onEmbeddedMessagingConversationRouted", event.detail);
+	});
+
+	window.addEventListener("onEmbeddedMessagingConversationParticipantChanged", (event) => {
+		console.log("Conversation Participant Changed:", event.detail);
+		logEvent("onEmbeddedMessagingConversationParticipantChanged", event.detail);
+	});
+
+	// Bot & Pre-Chat Events
+	window.addEventListener("onEmbeddedMessagingFirstBotMessageSent", (event) => {
+		console.log("First Bot Message Sent:", event.detail);
+		logEvent("onEmbeddedMessagingFirstBotMessageSent", event.detail);
+	});
+
+	window.addEventListener("onEmbeddedMessagingPreChatLoaded", (event) => {
+		console.log("Pre-Chat Loaded:", event.detail);
+		logEvent("onEmbeddedMessagingPreChatLoaded", event.detail);
+	});
+
+	window.addEventListener("onEmbeddedMessagingPreChatSubmitted", (event) => {
+		console.log("Pre-Chat Submitted:", event.detail);
+		logEvent("onEmbeddedMessagingPreChatSubmitted", event.detail);
+	});
+
+	// Invitation Events
+	window.addEventListener("onEmbeddedMessagingInvitationShown", (event) => {
+		console.log("Invitation Shown:", event.detail);
+		logEvent("onEmbeddedMessagingInvitationShown", event.detail);
+	});
+
+	window.addEventListener("onEmbeddedMessagingInvitationAccepted", (event) => {
+		console.log("Invitation Accepted:", event.detail);
+		logEvent("onEmbeddedMessagingInvitationAccepted", event.detail);
+	});
+
+	window.addEventListener("onEmbeddedMessagingInvitationRejected", (event) => {
+		console.log("Invitation Rejected:", event.detail);
+		logEvent("onEmbeddedMessagingInvitationRejected", event.detail);
+	});
+
+	// Verification Events
+	window.addEventListener("onEmbeddedMessagingIdentityTokenExpired", (event) => {
+		console.log("Identity Token Expired:", event.detail);
+		logEvent("onEmbeddedMessagingIdentityTokenExpired", event.detail);
+	});
+
+	// Transcript Events
+	window.addEventListener("onEmbeddedMessagingTranscriptRequested", (event) => {
+		console.log("Transcript Requested:", event.detail);
+		logEvent("onEmbeddedMessagingTranscriptRequested", event.detail);
+	});
+
+	window.addEventListener("onEmbeddedMessagingTranscriptDownloadSuccessful", (event) => {
+		console.log("Transcript Download Successful:", event.detail);
+		logEvent("onEmbeddedMessagingTranscriptDownloadSuccessful", event.detail);
+	});
+
+	window.addEventListener("onEmbeddedMessagingTranscriptRequestFailed", (event) => {
+		console.log("Transcript Request Failed:", event.detail);
+		logEvent("onEmbeddedMessagingTranscriptRequestFailed", event.detail);
 	});
 </script>
 <script type='text/javascript' src='https://agentforceweb.demo.my.site.com/ESWMIAWDirecttoService1749749039230/assets/js/bootstrap.min.js' onload='initEmbeddedMessaging()'></script>
