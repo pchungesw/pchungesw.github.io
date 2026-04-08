@@ -122,8 +122,24 @@
 
 <div style="max-width: 800px; margin: 2rem auto;">
 	<h2 class="slds-text-heading_medium" style="margin-bottom: 1rem;">Event Log</h2>
-	<div id="eventLog" style="border: 1px solid #d8dde6; border-radius: 4px; background-color: #f3f3f3; padding: 1rem; height: 400px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 12px;">
+	<div id="eventLog" style="border: 1px solid #d8dde6; border-radius: 4px; background-color: #f3f3f3; padding: 1rem; height: 500px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 12px;">
 		<div style="color: #706e6b;">Waiting for events...</div>
+	</div>
+
+	<div style="margin-top: 1rem; border: 1px solid #d8dde6; border-radius: 4px; background-color: #ffffff; padding: 1rem;">
+		<div style="cursor: pointer; user-select: none; display: flex; align-items: center; justify-content: space-between;" onclick="toggleEventLogSettings()">
+			<h3 class="slds-text-heading_small">Event Log Settings</h3>
+			<span id="eventLogSettingsIcon">▼</span>
+		</div>
+		<div id="eventLogSettingsContent" style="display: none; margin-top: 1rem;">
+			<div class="slds-form-element">
+				<label class="slds-checkbox">
+					<input type="checkbox" id="hideReceiptsCheckbox" />
+					<span class="slds-checkbox_faux"></span>
+					<span class="slds-form-element__label">Hide Send and Delivery Receipts</span>
+				</label>
+			</div>
+		</div>
 	</div>
 </div>
 
@@ -153,6 +169,12 @@
 	const MAX_LOG_ENTRIES = 50;
 
 	function logEvent(eventName, eventDetail) {
+		// Check if we should hide receipts and if this is a receipt event
+		const hideReceipts = document.getElementById('hideReceiptsCheckbox').checked;
+		if (hideReceipts && (eventName === 'onEmbeddedMessageRead' || eventName === 'onEmbeddedMessageDelivered')) {
+			return; // Skip logging this event
+		}
+
 		const eventLog = document.getElementById('eventLog');
 		const timestamp = new Date().toLocaleTimeString();
 
@@ -171,7 +193,18 @@
 			? JSON.stringify(eventDetail, null, 2)
 			: '{}';
 
-		logEntry.innerHTML = `<span style="color: #0176d3; font-weight: bold;">[${timestamp}]</span> <span style="color: #080707;">${eventName}</span><br><span style="color: #706e6b; margin-left: 1rem;">${detailStr}</span>`;
+		// Create unique ID for this entry
+		const entryId = 'entry_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+		// Create collapsible header and payload
+		logEntry.innerHTML = `
+			<div style="cursor: pointer; user-select: none;" onclick="document.getElementById('${entryId}').style.display = document.getElementById('${entryId}').style.display === 'none' ? 'block' : 'none'; this.querySelector('.toggle-icon').textContent = document.getElementById('${entryId}').style.display === 'none' ? '▶' : '▼';">
+				<span class="toggle-icon" style="color: #706e6b; margin-right: 0.5rem;">▶</span>
+				<span style="color: #0176d3; font-weight: bold;">[${timestamp}]</span>
+				<span style="color: #080707;">${eventName}</span>
+			</div>
+			<div id="${entryId}" style="display: none; color: #706e6b; margin-left: 1.5rem; margin-top: 0.25rem; white-space: pre-wrap;">${detailStr}</div>
+		`;
 
 		// Add to log
 		eventLog.appendChild(logEntry);
@@ -195,6 +228,18 @@
 		const icon = document.getElementById(iconId);
 		content.classList.toggle('open');
 		icon.textContent = content.classList.contains('open') ? '▲' : '▼';
+	}
+
+	function toggleEventLogSettings() {
+		const content = document.getElementById('eventLogSettingsContent');
+		const icon = document.getElementById('eventLogSettingsIcon');
+		if (content.style.display === 'none') {
+			content.style.display = 'block';
+			icon.textContent = '▲';
+		} else {
+			content.style.display = 'none';
+			icon.textContent = '▼';
+		}
 	}
 
 	function handleSearch() {
