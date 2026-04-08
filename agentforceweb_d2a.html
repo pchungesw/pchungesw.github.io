@@ -4,6 +4,28 @@
 <title>Neat Stuff MIAW Demo - Direct to Agent</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@salesforce-ux/design-system@2.22.2/assets/styles/salesforce-lightning-design-system.min.css">
 <link rel="stylesheet" href="demo-styles.css">
+<style>
+	@keyframes slideIn {
+		from {
+			transform: translateX(400px);
+			opacity: 0;
+		}
+		to {
+			transform: translateX(0);
+			opacity: 1;
+		}
+	}
+	@keyframes slideOut {
+		from {
+			transform: translateX(0);
+			opacity: 1;
+		}
+		to {
+			transform: translateX(400px);
+			opacity: 0;
+		}
+	}
+</style>
 </head>
 <body class="slds-scope">
 
@@ -163,6 +185,9 @@
 	</div>
 </div>
 
+<!-- Toast Notification Container -->
+<div id="toastContainer" style="position: fixed; bottom: 2rem; right: 2rem; z-index: 10000;"></div>
+
 <!-- <script type='text/javascript' src='https://service.force.com/asyncclient/bootstrap.js'></script> -->
 
 <script type='text/javascript'>
@@ -187,6 +212,48 @@
 	};
 
 	const MAX_LOG_ENTRIES = 50;
+
+	// Reusable toast notification function
+	function showToast(message, type = 'success') {
+		const container = document.getElementById('toastContainer');
+		const toast = document.createElement('div');
+
+		// Set colors based on type
+		const colors = {
+			success: { bg: '#4bca81', border: '#2e844a' },
+			error: { bg: '#ea001e', border: '#c9302c' },
+			info: { bg: '#0176d3', border: '#014486' }
+		};
+
+		const color = colors[type] || colors.info;
+
+		toast.style.cssText = `
+			background-color: ${color.bg};
+			color: white;
+			padding: 0.75rem 1rem;
+			border-radius: 4px;
+			margin-bottom: 0.5rem;
+			box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+			font-size: 0.875rem;
+			font-weight: 500;
+			border-left: 4px solid ${color.border};
+			animation: slideIn 0.3s ease-out;
+			max-width: 300px;
+		`;
+
+		toast.textContent = message;
+		container.appendChild(toast);
+
+		// Remove after 1.5 seconds
+		setTimeout(() => {
+			toast.style.animation = 'slideOut 0.3s ease-in';
+			setTimeout(() => {
+				if (toast.parentNode) {
+					container.removeChild(toast);
+				}
+			}, 300);
+		}, 1500);
+	}
 
 	function logEvent(eventName, eventDetail) {
 		// Check if we should hide receipts and if this is a receipt event
@@ -266,7 +333,7 @@
 		const searchQuery = document.getElementById('searchInput').value;
 
 		if (!searchQuery.trim()) {
-			alert('Please enter a search query');
+			showToast('Please enter a search query', 'info');
 			return;
 		}
 
@@ -277,18 +344,18 @@
 			})
 				.then(() => {
 					console.log('Session context set with search:', searchQuery);
-					alert('Search context set: "' + searchQuery + '"\nYou can now start a chat and the agent will see your search query.');
+					showToast(`Search context set: "${searchQuery}"`, 'success');
 				})
 				.catch((error) => {
 					console.error('Failed to set session context:', error);
-					alert('Unable to set search context.');
+					showToast('Unable to set search context', 'error');
 				})
 				.finally(() => {
 					console.log('Set session context attempt completed');
 				});
 		} else {
 			console.error('Embedded Messaging is not yet loaded');
-			alert('Chat is not ready yet. Please wait a moment and try again.');
+			showToast('Chat is not ready yet', 'info');
 		}
 	}
 
@@ -300,14 +367,14 @@
 				})
 				.catch((error) => {
 					console.error('Failed to launch chat:', error);
-					alert('Unable to start chat. Please try again.');
+					showToast('Unable to start chat', 'error');
 				})
 				.finally(() => {
 					console.log('Launch chat attempt completed');
 				});
 		} else {
 			console.error('Embedded Messaging is not yet loaded');
-			alert('Chat is not ready yet. Please wait a moment and try again.');
+			showToast('Chat is not ready yet', 'info');
 		}
 	}
 
@@ -319,26 +386,28 @@
 				embeddedservice_bootstrap.utilAPI.showChatButton()
 					.then(() => {
 						console.log('Chat button shown successfully');
+						showToast('Chat button visible', 'success');
 					})
 					.catch((error) => {
 						console.error('Failed to show chat button:', error);
-						alert('Unable to show chat button. Make sure chat window is not open.');
+						showToast('Unable to show chat button', 'error');
 						document.getElementById('chatButtonToggle').checked = false;
 					});
 			} else {
 				embeddedservice_bootstrap.utilAPI.hideChatButton()
 					.then(() => {
 						console.log('Chat button hidden successfully');
+						showToast('Chat button hidden', 'success');
 					})
 					.catch((error) => {
 						console.error('Failed to hide chat button:', error);
-						alert('Unable to hide chat button. Make sure chat window is not open.');
+						showToast('Unable to hide chat button', 'error');
 						document.getElementById('chatButtonToggle').checked = true;
 					});
 			}
 		} else {
 			console.error('Embedded Messaging is not yet loaded');
-			alert('Chat is not ready yet. Please wait a moment and try again.');
+			showToast('Chat is not ready yet', 'info');
 			document.getElementById('chatButtonToggle').checked = !isChecked;
 		}
 	}
@@ -355,14 +424,14 @@
 					routingDirection: routingValue
 				});
 				console.log('Hidden pre-chat field set successfully:', { routingDirection: routingValue });
-				alert('Routing Direction set to: ' + routingValue);
+				showToast(`Routing Direction: ${routingValue}`, 'success');
 			} catch (error) {
 				console.error('Failed to set hidden pre-chat field:', error);
-				alert('Unable to set routing direction: ' + (error ? error.message : 'Unknown error'));
+				showToast('Failed to set routing direction', 'error');
 			}
 		} else {
-			console.warn('Embedded Messaging API not ready yet');
-			alert('Pre-chat field will be applied when chat loads.');
+			console.warn('Embedded Messaging API not ready yet - pre-chat field will be applied when chat loads');
+			showToast(`Routing Direction: ${routingValue}`, 'info');
 		}
 	}
 
@@ -404,16 +473,16 @@
 					result
 						.then(() => {
 							console.log("Pre-chat fields set successfully (promise)");
-							alert('Pre-chat fields updated successfully!');
+							showToast('Pre-chat fields updated successfully!', 'success');
 						})
 						.catch((error) => {
 							console.error("Error setting pre-chat fields:", error);
-							alert('Error updating pre-chat fields: ' + (error ? error.message : 'Unknown error'));
+							showToast('Error updating pre-chat fields', 'error');
 						});
 				} else {
 					// It's synchronous
 					console.log("Pre-chat fields set successfully (synchronous)");
-					alert('Pre-chat fields updated successfully!');
+					showToast('Pre-chat fields updated successfully!', 'success');
 				}
 			} catch (error) {
 				console.error("Exception caught:", error);
@@ -421,11 +490,11 @@
 				console.error("Error string:", String(error));
 				console.error("Error message:", error ? error.message : 'no message');
 				console.error("Full error object:", JSON.stringify(error, Object.getOwnPropertyNames(error)));
-				alert('Exception: ' + (error && error.message ? error.message : String(error)));
+				showToast('Exception updating pre-chat fields', 'error');
 			}
 		} else {
 			console.warn("Embedded Messaging API not ready yet");
-			alert('Pre-chat fields will be applied when chat loads.');
+			showToast('Pre-chat fields will be applied when chat loads', 'info');
 		}
 	}
 
