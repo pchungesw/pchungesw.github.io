@@ -41,7 +41,7 @@
 			<tr>
 				<td class="slds-text-body_small slds-text-color_weak">Routing Type:</td>
 				<td class="slds-text-body_regular">
-					<a href="https://agentforceweb.demo.lightning.force.com/builder_platform_interaction/flowBuilder.app?flowId=301Ws00004BkB4wIAF" target="_blank" class="slds-text-link">Flow - SDO Service - MIAW Omni Flow</a>
+					<a href="https://agentforceweb.demo.my.salesforce-setup.com/lightning/setup/Flows/page?address=%2F300Ws00000zsj9tIAA%3FretUrl%3D%2Flightning%2Fsetup%2FFlows%2Fhome" target="_blank" class="slds-text-link">Flow - Messaging Session Omni-Flow</a>
 				</td>
 			</tr>
 			<tr>
@@ -94,6 +94,26 @@
 						<span class="slds-checkbox_faux"></span>
 						<span class="slds-checkbox_on">Visible</span>
 						<span class="slds-checkbox_off">Hidden</span>
+					</span>
+				</label>
+			</div>
+		</div>
+	</div>
+
+	<div class="collapsible-section">
+		<div class="collapsible-header" onclick="toggleCollapsibleSection('hiddenPrechatContent', 'hiddenPrechatIcon')">
+			<h3 class="slds-text-heading_small">Hidden Pre-chat</h3>
+			<span id="hiddenPrechatIcon">▼</span>
+		</div>
+		<div class="collapsible-content" id="hiddenPrechatContent">
+			<div class="slds-form-element">
+				<label class="slds-checkbox_toggle slds-grid">
+					<span class="slds-form-element__label slds-m-bottom_none">Routing Direction</span>
+					<input type="checkbox" id="routingDirectionToggle" onchange="toggleRoutingDirection()" />
+					<span id="routingDirectionToggle-label" class="slds-checkbox_faux_container" aria-live="assertive">
+						<span class="slds-checkbox_faux"></span>
+						<span class="slds-checkbox_on">Agent</span>
+						<span class="slds-checkbox_off">Queue</span>
 					</span>
 				</label>
 			</div>
@@ -323,6 +343,29 @@
 		}
 	}
 
+	function toggleRoutingDirection() {
+		const isChecked = document.getElementById('routingDirectionToggle').checked;
+		const routingValue = isChecked ? "Agent" : "Queue";
+
+		console.log("Routing Direction toggle changed to:", routingValue);
+
+		if (typeof embeddedservice_bootstrap !== 'undefined' && embeddedservice_bootstrap.prechatAPI) {
+			try {
+				embeddedservice_bootstrap.prechatAPI.setHiddenPrechatFields({
+					routingDirection: routingValue
+				});
+				console.log('Hidden pre-chat field set successfully:', { routingDirection: routingValue });
+				alert('Routing Direction set to: ' + routingValue);
+			} catch (error) {
+				console.error('Failed to set hidden pre-chat field:', error);
+				alert('Unable to set routing direction: ' + (error ? error.message : 'Unknown error'));
+			}
+		} else {
+			console.warn('Embedded Messaging API not ready yet');
+			alert('Pre-chat field will be applied when chat loads.');
+		}
+	}
+
 	function savePrechatFields() {
 		console.log("Save button clicked!");
 
@@ -415,6 +458,16 @@
 				console.log("Pre-chat fields also set via prechatAPI:", prechatValues);
 			} catch (error) {
 				console.error("Error with prechatAPI:", error);
+			}
+
+			// Set default hidden pre-chat field for routing direction
+			try {
+				embeddedservice_bootstrap.prechatAPI.setHiddenPrechatFields({
+					routingDirection: "Queue"
+				});
+				console.log("Default routing direction set to: Queue");
+			} catch (error) {
+				console.error("Error setting default routing direction:", error);
 			}
 		}
 
