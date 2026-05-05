@@ -1,151 +1,31 @@
 <html>
 <head>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, user-scalable=0">
 <title>Neat Stuff MIAW Demo - Direct to Agent</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@salesforce-ux/design-system@2.22.2/assets/styles/salesforce-lightning-design-system.min.css">
 <link rel="stylesheet" href="demo-styles.css">
 <style>
 	@keyframes slideIn {
-		from {
-			transform: translateX(400px);
-			opacity: 0;
-		}
-		to {
-			transform: translateX(0);
-			opacity: 1;
-		}
+		from { transform: translateX(400px); opacity: 0; }
+		to   { transform: translateX(0);     opacity: 1; }
 	}
 	@keyframes slideOut {
-		from {
-			transform: translateX(0);
-			opacity: 1;
-		}
-		to {
-			transform: translateX(400px);
-			opacity: 0;
-		}
+		from { transform: translateX(0);     opacity: 1; }
+		to   { transform: translateX(400px); opacity: 0; }
 	}
 </style>
 </head>
 <body class="slds-scope">
 
-<div class="slide-panel" id="slidePanel">
-	<h2 class="slds-text-heading_medium">Page Settings</h2>
-	<div class="collapsible-section">
-		<div class="collapsible-header" onclick="toggleCollapsibleSection('configContent', 'configIcon')">
-			<h3 class="slds-text-heading_small">Configuration Details</h3>
-			<span id="configIcon">▼</span>
-		</div>
-		<div class="collapsible-content" id="configContent">
-		<table class="info-table">
-			<tr>
-				<td class="slds-text-body_small slds-text-color_weak">Org Name:</td>
-				<td class="slds-text-body_regular">Agentforceweb</td>
-			</tr>
-			<tr>
-				<td class="slds-text-body_small slds-text-color_weak">Org ID:</td>
-				<td class="slds-text-body_regular">00DWs00000CvEVZ</td>
-			</tr>
-			<tr>
-				<td class="slds-text-body_small slds-text-color_weak">Embedded Service Name:</td>
-				<td class="slds-text-body_regular">
-					<a href="https://agentforceweb.demo.my.salesforce-setup.com/lightning/setup/EmbeddedServiceDeployments/04IWs000000CeCzMAK/view" target="_blank" class="slds-text-link">MIAW-Direct to Service Rep</a>
-				</td>
-			</tr>
-			<tr>
-				<td class="slds-text-body_small slds-text-color_weak">Messaging Channel:</td>
-				<td class="slds-text-body_regular">
-					MIAW - Direct to Service Rep
-					(<a href="https://agentforceweb.demo.my.salesforce-setup.com/lightning/setup/LiveMessageSetup/0MjWs000001FdOfKAK/view?lightning__channelType=" target="_blank" class="slds-text-link">view</a> |
-					<a href="https://agentforceweb.demo.my.salesforce-setup.com/lightning/setup/LiveMessageSetup/0MjWs000001FdOfKAK/view?lightning__channelType=EmbeddedMessaging" target="_blank" class="slds-text-link">edit</a>)
-				</td>
-			</tr>
-			<tr>
-				<td class="slds-text-body_small slds-text-color_weak">Routing Type:</td>
-				<td class="slds-text-body_regular">
-					<a href="https://agentforceweb.demo.my.salesforce-setup.com/lightning/setup/Flows/page?address=%2F300Ws00000zsj9tIAA%3FretUrl%3D%2Flightning%2Fsetup%2FFlows%2Fhome" target="_blank" class="slds-text-link">Flow - Messaging Session Omni-Flow</a>
-				</td>
-			</tr>
-			<tr>
-				<td class="slds-text-body_small slds-text-color_weak">Github Page:</td>
-				<td class="slds-text-body_regular">
-					<a href="https://github.com/pchungesw/pchungesw.github.io/blob/main/agentforceweb_d2a.html" target="_blank" class="slds-text-link">click here</a>
-				</td>
-			</tr>
-		</table>
-		</div>
-	</div>
+<!-- ═══════════════════════════════════════════════════════════════════════
+     The Page Settings slide-panel (☰ Menu) is injected entirely by
+     esw-page-menu.js via ESWMenu.init() near the bottom of this file.
+     To change the panel UI, edit ONLY esw-page-menu.js — changes apply
+     to every page that includes it.
+════════════════════════════════════════════════════════════════════════ -->
 
-	<div class="collapsible-section">
-		<div class="collapsible-header" onclick="toggleCollapsibleSection('prechatContent', 'prechatIcon')">
-			<h3 class="slds-text-heading_small">Pre-Chat Population</h3>
-			<span id="prechatIcon">▼</span>
-		</div>
-		<div class="collapsible-content" id="prechatContent">
-			<div class="form-field">
-				<label for="firstName">First Name:</label>
-				<input type="text" id="firstName" value="Peter" class="slds-input">
-			</div>
-			<div class="form-field">
-				<label for="lastName">Last Name:</label>
-				<input type="text" id="lastName" value="Chung" class="slds-input">
-			</div>
-			<div class="form-field">
-				<label for="email">Email:</label>
-				<input type="email" id="email" value="pchung@salesforce.com" class="slds-input">
-			</div>
-			<div class="form-field">
-				<label for="subject">Subject:</label>
-				<input type="text" id="subject" value="product question" class="slds-input">
-			</div>
-			<button class="slds-button slds-button_brand" onclick="savePrechatFields()">Save</button>
-		</div>
-	</div>
-
-	<div class="collapsible-section">
-		<div class="collapsible-header" onclick="toggleCollapsibleSection('chatButtonContent', 'chatButtonIcon')">
-			<h3 class="slds-text-heading_small">Chat Button Visibility</h3>
-			<span id="chatButtonIcon">▼</span>
-		</div>
-		<div class="collapsible-content" id="chatButtonContent">
-			<div class="slds-form-element">
-				<label class="slds-checkbox_toggle slds-grid">
-					<span class="slds-form-element__label slds-m-bottom_none">Show Chat Button</span>
-					<input type="checkbox" id="chatButtonToggle" onchange="toggleChatButton()" checked />
-					<span id="chatButtonToggle-label" class="slds-checkbox_faux_container" aria-live="assertive">
-						<span class="slds-checkbox_faux"></span>
-						<span class="slds-checkbox_on">Visible</span>
-						<span class="slds-checkbox_off">Hidden</span>
-					</span>
-				</label>
-			</div>
-		</div>
-	</div>
-
-	<div class="collapsible-section">
-		<div class="collapsible-header" onclick="toggleCollapsibleSection('hiddenPrechatContent', 'hiddenPrechatIcon')">
-			<h3 class="slds-text-heading_small">Hidden Pre-chat</h3>
-			<span id="hiddenPrechatIcon">▼</span>
-		</div>
-		<div class="collapsible-content" id="hiddenPrechatContent">
-			<div class="slds-form-element">
-				<label class="slds-checkbox_toggle slds-grid">
-					<span class="slds-form-element__label slds-m-bottom_none">Routing Direction</span>
-					<input type="checkbox" id="routingDirectionToggle" onchange="toggleRoutingDirection()" />
-					<span id="routingDirectionToggle-label" class="slds-checkbox_faux_container" aria-live="assertive">
-						<span class="slds-checkbox_faux"></span>
-						<span class="slds-checkbox_on">Agent</span>
-						<span class="slds-checkbox_off">Queue</span>
-					</span>
-				</label>
-			</div>
-		</div>
-	</div>
-</div>
-
-<button class="toggle-btn slds-button slds-button_brand" onclick="togglePanel()">
-	☰ Menu
-</button>
+<!-- ── Page body ──────────────────────────────────────────────────────── -->
 
 <div class="page-header">
 	<h1 class="slds-text-heading_large">Enhanced Chat v1</h1>
@@ -153,208 +33,56 @@
 
 <div style="max-width: 600px; margin: 2rem auto; text-align: center;">
 	<div style="display: flex; gap: 0.5rem; justify-content: center;">
-		<input type="text" id="searchInput" placeholder="Search for products..." class="slds-input" style="flex: 1; max-width: 400px;" onkeypress="if(event.key === 'Enter') handleSearch()">
+		<input type="text" id="searchInput" placeholder="Search for products..."
+		       class="slds-input" style="flex: 1; max-width: 400px;"
+		       onkeypress="if(event.key === 'Enter') handleSearch()">
 		<button class="slds-button slds-button_neutral" onclick="handleSearch()">Search</button>
 	</div>
 </div>
 
 <div style="text-align: center; margin-top: 2rem;">
-	<button id="startChatBtn" class="slds-button slds-button_brand" onclick="startChat()" style="display: none;">Start Chat</button>
+	<button id="startChatBtn" class="slds-button slds-button_brand"
+	        onclick="startChat()" style="display: none;">Start Chat</button>
 </div>
 
-<div style="max-width: 800px; margin: 2rem auto;">
-	<h2 class="slds-text-heading_medium" style="margin-bottom: 1rem;">Event Log</h2>
-	<div id="eventLog" style="border: 1px solid #d8dde6; border-radius: 4px; background-color: #f3f3f3; padding: 1rem; height: 500px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 12px;">
-		<div style="color: #706e6b;">Waiting for events...</div>
-	</div>
-
-	<div style="margin-top: 1rem; border: 1px solid #d8dde6; border-radius: 4px; background-color: #ffffff; padding: 1rem;">
-		<div style="cursor: pointer; user-select: none; display: flex; align-items: center; justify-content: space-between;" onclick="toggleEventLogSettings()">
-			<h3 class="slds-text-heading_small">Event Log Settings</h3>
-			<span id="eventLogSettingsIcon">▼</span>
-		</div>
-		<div id="eventLogSettingsContent" style="display: none; margin-top: 1rem;">
-			<div class="slds-form-element">
-				<label class="slds-checkbox">
-					<input type="checkbox" id="hideReceiptsCheckbox" />
-					<span class="slds-checkbox_faux"></span>
-					<span class="slds-form-element__label">Hide Send and Delivery Receipts</span>
-				</label>
-			</div>
-		</div>
-	</div>
-</div>
-
-<!-- Toast Notification Container -->
-<div id="toastContainer" style="position: fixed; bottom: 2rem; right: 2rem; z-index: 10000;"></div>
-
-<!-- <script type='text/javascript' src='https://service.force.com/asyncclient/bootstrap.js'></script> -->
-
-<script type='text/javascript'>
-	// Store pre-chat field values
-	let prechatValues = {
-		_firstName: {
-			value: "Peter",
-			isEditableByEndUser: true
-		},
-		_lastName: {
-			value: "Chung",
-			isEditableByEndUser: true
-		},
-		_email: {
-			value: "pchung@salesforce.com",
-			isEditableByEndUser: true
-		},
-		_subject: {
-			value: "product question",
-			isEditableByEndUser: true
-		}
+<!-- ═══════════════════════════════════════════════════════════════════════
+     Page scripts
+════════════════════════════════════════════════════════════════════════ -->
+<script>
+	// ── Default deployment configuration for this page ──────────────────
+	// These are the values that will be used unless the user overrides
+	// them via the Deployment Settings section in the menu.
+	const PAGE_DEPLOY_DEFAULTS = {
+		orgId:          '00DWs00000CvEVZ',
+		deploymentName: 'MIAW_Direct_to_Service_Rep',
+		siteEndpoint:   'https://agentforceweb.demo.my.site.com/ESWMIAWDirecttoService1749749039230',
+		scrt2URL:       'https://agentforceweb.demo.my.salesforce-scrt.com'
 	};
 
-	const MAX_LOG_ENTRIES = 50;
+	// ── Pre-chat field values (kept in sync by ESWMenu) ──────────────────
+	let prechatValues = {
+		_firstName: { value: 'Peter',                isEditableByEndUser: true },
+		_lastName:  { value: 'Chung',                isEditableByEndUser: true },
+		_email:     { value: 'pchung@salesforce.com', isEditableByEndUser: true },
+		_subject:   { value: 'product question',     isEditableByEndUser: true }
+	};
 
-	// Reusable toast notification function
-	function showToast(message, type = 'success') {
-		const container = document.getElementById('toastContainer');
-		const toast = document.createElement('div');
-
-		// Set colors based on type
-		const colors = {
-			success: { bg: '#4bca81', border: '#2e844a' },
-			error: { bg: '#ea001e', border: '#c9302c' },
-			info: { bg: '#0176d3', border: '#014486' }
-		};
-
-		const color = colors[type] || colors.info;
-
-		toast.style.cssText = `
-			background-color: ${color.bg};
-			color: white;
-			padding: 0.75rem 1rem;
-			border-radius: 4px;
-			margin-bottom: 0.5rem;
-			box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-			font-size: 0.875rem;
-			font-weight: 500;
-			border-left: 4px solid ${color.border};
-			animation: slideIn 0.3s ease-out;
-			max-width: 300px;
-		`;
-
-		toast.textContent = message;
-		container.appendChild(toast);
-
-		// Remove after 1.5 seconds
-		setTimeout(() => {
-			toast.style.animation = 'slideOut 0.3s ease-in';
-			setTimeout(() => {
-				if (toast.parentNode) {
-					container.removeChild(toast);
-				}
-			}, 300);
-		}, 1500);
-	}
-
-	function logEvent(eventName, eventDetail) {
-		// Check if we should hide receipts and if this is a receipt event
-		const hideReceipts = document.getElementById('hideReceiptsCheckbox').checked;
-		if (hideReceipts && (eventName === 'onEmbeddedMessageRead' || eventName === 'onEmbeddedMessageDelivered')) {
-			return; // Skip logging this event
-		}
-
-		const eventLog = document.getElementById('eventLog');
-		const timestamp = new Date().toLocaleTimeString();
-
-		// Clear the "Waiting for events..." message on first event
-		if (eventLog.children.length === 1 && eventLog.children[0].textContent === 'Waiting for events...') {
-			eventLog.innerHTML = '';
-		}
-
-		// Create new log entry
-		const logEntry = document.createElement('div');
-		logEntry.style.marginBottom = '0.5rem';
-		logEntry.style.paddingBottom = '0.5rem';
-		logEntry.style.borderBottom = '1px solid #d8dde6';
-
-		const detailStr = eventDetail && Object.keys(eventDetail).length > 0
-			? JSON.stringify(eventDetail, null, 2)
-			: '{}';
-
-		// Create unique ID for this entry
-		const entryId = 'entry_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-
-		// Create collapsible header and payload
-		logEntry.innerHTML = `
-			<div style="cursor: pointer; user-select: none;" onclick="document.getElementById('${entryId}').style.display = document.getElementById('${entryId}').style.display === 'none' ? 'block' : 'none'; this.querySelector('.toggle-icon').textContent = document.getElementById('${entryId}').style.display === 'none' ? '▶' : '▼';">
-				<span class="toggle-icon" style="color: #706e6b; margin-right: 0.5rem;">▶</span>
-				<span style="color: #0176d3; font-weight: bold;">[${timestamp}]</span>
-				<span style="color: #080707;">${eventName}</span>
-			</div>
-			<div id="${entryId}" style="display: none; color: #706e6b; margin-left: 1.5rem; margin-top: 0.25rem; white-space: pre-wrap;">${detailStr}</div>
-		`;
-
-		// Add to log
-		eventLog.appendChild(logEntry);
-
-		// Remove oldest entry if we exceed max entries
-		if (eventLog.children.length > MAX_LOG_ENTRIES) {
-			eventLog.removeChild(eventLog.firstChild);
-		}
-
-		// Auto-scroll to bottom
-		eventLog.scrollTop = eventLog.scrollHeight;
-	}
-
-	function togglePanel() {
-		const panel = document.getElementById('slidePanel');
-		panel.classList.toggle('open');
-	}
-
-	function toggleCollapsibleSection(contentId, iconId) {
-		const content = document.getElementById(contentId);
-		const icon = document.getElementById(iconId);
-		content.classList.toggle('open');
-		icon.textContent = content.classList.contains('open') ? '▲' : '▼';
-	}
-
-	function toggleEventLogSettings() {
-		const content = document.getElementById('eventLogSettingsContent');
-		const icon = document.getElementById('eventLogSettingsIcon');
-		if (content.style.display === 'none') {
-			content.style.display = 'block';
-			icon.textContent = '▲';
-		} else {
-			content.style.display = 'none';
-			icon.textContent = '▼';
-		}
+	// ── Utility wrappers ─────────────────────────────────────────────────
+	function showToast(message, type) {
+		ESWMenu.showToast(message, type);
 	}
 
 	function handleSearch() {
 		const searchQuery = document.getElementById('searchInput').value;
-
 		if (!searchQuery.trim()) {
 			showToast('Please enter a search query', 'info');
 			return;
 		}
-
-		// Set session context with the search query
 		if (typeof embeddedservice_bootstrap !== 'undefined' && embeddedservice_bootstrap.utilAPI) {
-			embeddedservice_bootstrap.utilAPI.setSessionContext({
-				search: searchQuery
-			})
-				.then(() => {
-					console.log('Session context set with search:', searchQuery);
-					showToast(`Search context set: "${searchQuery}"`, 'success');
-				})
-				.catch((error) => {
-					console.error('Failed to set session context:', error);
-					showToast('Unable to set search context', 'error');
-				})
-				.finally(() => {
-					console.log('Set session context attempt completed');
-				});
+			embeddedservice_bootstrap.utilAPI.setSessionContext({ search: searchQuery })
+				.then(function ()  { showToast('Search context set: "' + searchQuery + '"', 'success'); })
+				.catch(function () { showToast('Unable to set search context', 'error'); });
 		} else {
-			console.error('Embedded Messaging is not yet loaded');
 			showToast('Chat is not ready yet', 'info');
 		}
 	}
@@ -362,340 +90,161 @@
 	function startChat() {
 		if (typeof embeddedservice_bootstrap !== 'undefined' && embeddedservice_bootstrap.utilAPI) {
 			embeddedservice_bootstrap.utilAPI.launchChat()
-				.then(() => {
-					console.log('Chat launched successfully');
-				})
-				.catch((error) => {
-					console.error('Failed to launch chat:', error);
-					showToast('Unable to start chat', 'error');
-				})
-				.finally(() => {
-					console.log('Launch chat attempt completed');
-				});
+				.catch(function () { showToast('Unable to start chat', 'error'); });
 		} else {
-			console.error('Embedded Messaging is not yet loaded');
 			showToast('Chat is not ready yet', 'info');
 		}
 	}
 
-	function toggleChatButton() {
-		const isChecked = document.getElementById('chatButtonToggle').checked;
-
-		if (typeof embeddedservice_bootstrap !== 'undefined' && embeddedservice_bootstrap.utilAPI) {
-			if (isChecked) {
-				embeddedservice_bootstrap.utilAPI.showChatButton()
-					.then(() => {
-						console.log('Chat button shown successfully');
-						showToast('Chat button visible', 'success');
-					})
-					.catch((error) => {
-						console.error('Failed to show chat button:', error);
-						showToast('Unable to show chat button', 'error');
-						document.getElementById('chatButtonToggle').checked = false;
-					});
-			} else {
-				embeddedservice_bootstrap.utilAPI.hideChatButton()
-					.then(() => {
-						console.log('Chat button hidden successfully');
-						showToast('Chat button hidden', 'success');
-					})
-					.catch((error) => {
-						console.error('Failed to hide chat button:', error);
-						showToast('Unable to hide chat button', 'error');
-						document.getElementById('chatButtonToggle').checked = true;
-					});
-			}
-		} else {
-			console.error('Embedded Messaging is not yet loaded');
-			showToast('Chat is not ready yet', 'info');
-			document.getElementById('chatButtonToggle').checked = !isChecked;
-		}
-	}
-
-	function toggleRoutingDirection() {
-		const isChecked = document.getElementById('routingDirectionToggle').checked;
-		const routingValue = isChecked ? "Agent" : "Queue";
-
-		console.log("Routing Direction toggle changed to:", routingValue);
-
-		if (typeof embeddedservice_bootstrap !== 'undefined' && embeddedservice_bootstrap.prechatAPI) {
-			try {
-				embeddedservice_bootstrap.prechatAPI.setHiddenPrechatFields({
-					routingDirection: routingValue
-				});
-				console.log('Hidden pre-chat field set successfully:', { routingDirection: routingValue });
-				showToast(`Routing Direction: ${routingValue}`, 'success');
-			} catch (error) {
-				console.error('Failed to set hidden pre-chat field:', error);
-				showToast('Failed to set routing direction', 'error');
-			}
-		} else {
-			console.warn('Embedded Messaging API not ready yet - pre-chat field will be applied when chat loads');
-			showToast(`Routing Direction: ${routingValue}`, 'info');
-		}
-	}
-
-	function savePrechatFields() {
-		console.log("Save button clicked!");
-
-		// Get values from form inputs
-		prechatValues._firstName = {
-			value: document.getElementById('firstName').value,
-			isEditableByEndUser: true
-		};
-		prechatValues._lastName = {
-			value: document.getElementById('lastName').value,
-			isEditableByEndUser: true
-		};
-		prechatValues._email = {
-			value: document.getElementById('email').value,
-			isEditableByEndUser: true
-		};
-		prechatValues._subject = {
-			value: document.getElementById('subject').value,
-			isEditableByEndUser: true
-		};
-
-		console.log("Attempting to set pre-chat fields:", prechatValues);
-		console.log("embeddedservice_bootstrap exists:", typeof embeddedservice_bootstrap !== 'undefined');
-		console.log("prechatAPI exists:", embeddedservice_bootstrap && embeddedservice_bootstrap.prechatAPI);
-
-		// Update pre-chat fields if the API is ready
-		if (typeof embeddedservice_bootstrap !== 'undefined' && embeddedservice_bootstrap.prechatAPI) {
-			try {
-				console.log("About to call setVisiblePrechatFields...");
-				const result = embeddedservice_bootstrap.prechatAPI.setVisiblePrechatFields(prechatValues);
-				console.log("setVisiblePrechatFields returned:", result);
-				console.log("Result type:", typeof result);
-
-				// Check if it returns a promise
-				if (result && typeof result.then === 'function') {
-					result
-						.then(() => {
-							console.log("Pre-chat fields set successfully (promise)");
-							showToast('Pre-chat fields updated successfully!', 'success');
-						})
-						.catch((error) => {
-							console.error("Error setting pre-chat fields:", error);
-							showToast('Error updating pre-chat fields', 'error');
-						});
-				} else {
-					// It's synchronous
-					console.log("Pre-chat fields set successfully (synchronous)");
-					showToast('Pre-chat fields updated successfully!', 'success');
-				}
-			} catch (error) {
-				console.error("Exception caught:", error);
-				console.error("Error type:", typeof error);
-				console.error("Error string:", String(error));
-				console.error("Error message:", error ? error.message : 'no message');
-				console.error("Full error object:", JSON.stringify(error, Object.getOwnPropertyNames(error)));
-				showToast('Exception updating pre-chat fields', 'error');
-			}
-		} else {
-			console.warn("Embedded Messaging API not ready yet");
-			showToast('Pre-chat fields will be applied when chat loads', 'info');
-		}
-	}
-
+	// ── Embedded Messaging init ──────────────────────────────────────────
+	// ESWMenu.getDeploymentConfig() returns the user's saved override (if
+	// any) or falls back to PAGE_DEPLOY_DEFAULTS.
 	function initEmbeddedMessaging() {
 		try {
-			embeddedservice_bootstrap.settings.language = 'en_US'; // For example, enter 'en' or 'en-US'
-
+			const deploy = ESWMenu.getDeploymentConfig(PAGE_DEPLOY_DEFAULTS);
+			embeddedservice_bootstrap.settings.language = 'en_US';
 			embeddedservice_bootstrap.init(
-				'00DWs00000CvEVZ',
-				'MIAW_Direct_to_Service_Rep',
-				'https://agentforceweb.demo.my.site.com/ESWMIAWDirecttoService1749749039230',
-				{
-					scrt2URL: 'https://agentforceweb.demo.my.salesforce-scrt.com'
-				}
+				deploy.orgId,
+				deploy.deploymentName,
+				deploy.siteEndpoint,
+				{ scrt2URL: deploy.scrt2URL }
 			);
 		} catch (err) {
 			console.error('Error loading Embedded Messaging: ', err);
 		}
-	};
+	}
 
-	// Listen for when the Embedded Messaging API is ready
-	window.addEventListener("onEmbeddedMessagingReady", () => {
-		console.log("Embedded Messaging API is ready");
-		logEvent("onEmbeddedMessagingReady", {});
+	// ── Embedded Messaging event listeners ──────────────────────────────
 
-		// Try setting via prechatAPI as well
+	window.addEventListener('onEmbeddedMessagingReady', function () {
+		ESWMenu.logEvent('onEmbeddedMessagingReady', {});
+
 		if (embeddedservice_bootstrap.prechatAPI) {
 			try {
 				embeddedservice_bootstrap.prechatAPI.setVisiblePrechatFields(prechatValues);
-				console.log("Pre-chat fields also set via prechatAPI:", prechatValues);
-			} catch (error) {
-				console.error("Error with prechatAPI:", error);
-			}
+			} catch (e) { console.error('Error with prechatAPI:', e); }
 
-			// Set default hidden pre-chat field for routing direction
 			try {
-				embeddedservice_bootstrap.prechatAPI.setHiddenPrechatFields({
-					routingDirection: "Queue"
-				});
-				console.log("Default routing direction set to: Queue");
-			} catch (error) {
-				console.error("Error setting default routing direction:", error);
-			}
+				embeddedservice_bootstrap.prechatAPI.setHiddenPrechatFields({ routingDirection: 'Queue' });
+			} catch (e) { console.error('Error setting default routing direction:', e); }
 		}
 
-		// Show the Start Chat button
 		document.getElementById('startChatBtn').style.display = 'inline-block';
 	});
 
-	// Conversation Status Events
-	window.addEventListener("onEmbeddedMessagingConversationStarted", (event) => {
-		console.log("Conversation Started:", event.detail);
-		logEvent("onEmbeddedMessagingConversationStarted", event.detail);
-	});
+	// Conversation Status
+	window.addEventListener('onEmbeddedMessagingConversationStarted', function (e) { ESWMenu.logEvent('onEmbeddedMessagingConversationStarted', e.detail); });
+	window.addEventListener('onEmbeddedMessagingConversationOpened',  function (e) { ESWMenu.logEvent('onEmbeddedMessagingConversationOpened',  e.detail); });
+	window.addEventListener('onEmbeddedMessagingConversationClosed',  function (e) { ESWMenu.logEvent('onEmbeddedMessagingConversationClosed',  e.detail); });
+	window.addEventListener('onEmbeddedMessagingSessionStatusUpdate', function (e) { ESWMenu.logEvent('onEmbeddedMessagingSessionStatusUpdate', e.detail); });
 
-	window.addEventListener("onEmbeddedMessagingConversationOpened", (event) => {
-		console.log("Conversation Opened:", event.detail);
-		logEvent("onEmbeddedMessagingConversationOpened", event.detail);
-	});
+	// Business Hours
+	window.addEventListener('onEmbeddedMessagingWithinBusinessHours',  function (e) { ESWMenu.logEvent('onEmbeddedMessagingWithinBusinessHours',  e.detail); });
+	window.addEventListener('onEmbeddedMessagingBusinessHoursStarted', function (e) { ESWMenu.logEvent('onEmbeddedMessagingBusinessHoursStarted', e.detail); });
+	window.addEventListener('onEmbeddedMessagingBusinessHoursEnded',   function (e) { ESWMenu.logEvent('onEmbeddedMessagingBusinessHoursEnded',   e.detail); });
 
-	window.addEventListener("onEmbeddedMessagingConversationClosed", (event) => {
-		console.log("Conversation Closed:", event.detail);
-		logEvent("onEmbeddedMessagingConversationClosed", event.detail);
-	});
+	// Button & Window
+	window.addEventListener('onEmbeddedMessagingButtonCreated',   function (e) { ESWMenu.logEvent('onEmbeddedMessagingButtonCreated',   e.detail); });
+	window.addEventListener('onEmbeddedMessagingButtonClicked',   function (e) { ESWMenu.logEvent('onEmbeddedMessagingButtonClicked',   e.detail); });
+	window.addEventListener('onEmbeddedMessagingWindowClosed',    function (e) { ESWMenu.logEvent('onEmbeddedMessagingWindowClosed',    e.detail); });
+	window.addEventListener('onEmbeddedMessagingWindowMinimized', function (e) { ESWMenu.logEvent('onEmbeddedMessagingWindowMinimized', e.detail); });
+	window.addEventListener('onEmbeddedMessagingWindowMaximized', function (e) { ESWMenu.logEvent('onEmbeddedMessagingWindowMaximized', e.detail); });
 
-	window.addEventListener("onEmbeddedMessagingSessionStatusUpdate", (event) => {
-		console.log("Session Status Update:", event.detail);
-		logEvent("onEmbeddedMessagingSessionStatusUpdate", event.detail);
-	});
+	// Messages
+	window.addEventListener('onEmbeddedMessageSent',        function (e) { ESWMenu.logEvent('onEmbeddedMessageSent',        e.detail); });
+	window.addEventListener('onEmbeddedMessageDelivered',   function (e) { ESWMenu.logEvent('onEmbeddedMessageDelivered',   e.detail); });
+	window.addEventListener('onEmbeddedMessageRead',        function (e) { ESWMenu.logEvent('onEmbeddedMessageRead',        e.detail); });
+	window.addEventListener('onEmbeddedMessageLinkClicked', function (e) { ESWMenu.logEvent('onEmbeddedMessageLinkClicked', e.detail); });
 
-	// Business Hours Events
-	window.addEventListener("onEmbeddedMessagingWithinBusinessHours", (event) => {
-		console.log("Within Business Hours:", event.detail);
-		logEvent("onEmbeddedMessagingWithinBusinessHours", event.detail);
-	});
+	// Routing & Participants
+	window.addEventListener('onEmbeddedMessagingConversationRouted',             function (e) { ESWMenu.logEvent('onEmbeddedMessagingConversationRouted',             e.detail); });
+	window.addEventListener('onEmbeddedMessagingConversationParticipantChanged', function (e) { ESWMenu.logEvent('onEmbeddedMessagingConversationParticipantChanged', e.detail); });
 
-	window.addEventListener("onEmbeddedMessagingBusinessHoursStarted", (event) => {
-		console.log("Business Hours Started:", event.detail);
-		logEvent("onEmbeddedMessagingBusinessHoursStarted", event.detail);
-	});
+	// Bot & Pre-Chat
+	window.addEventListener('onEmbeddedMessagingFirstBotMessageSent', function (e) { ESWMenu.logEvent('onEmbeddedMessagingFirstBotMessageSent', e.detail); });
+	window.addEventListener('onEmbeddedMessagingPreChatLoaded',       function (e) { ESWMenu.logEvent('onEmbeddedMessagingPreChatLoaded',       e.detail); });
+	window.addEventListener('onEmbeddedMessagingPreChatSubmitted',    function (e) { ESWMenu.logEvent('onEmbeddedMessagingPreChatSubmitted',    e.detail); });
 
-	window.addEventListener("onEmbeddedMessagingBusinessHoursEnded", (event) => {
-		console.log("Business Hours Ended:", event.detail);
-		logEvent("onEmbeddedMessagingBusinessHoursEnded", event.detail);
-	});
+	// Invitations
+	window.addEventListener('onEmbeddedMessagingInvitationShown',    function (e) { ESWMenu.logEvent('onEmbeddedMessagingInvitationShown',    e.detail); });
+	window.addEventListener('onEmbeddedMessagingInvitationAccepted', function (e) { ESWMenu.logEvent('onEmbeddedMessagingInvitationAccepted', e.detail); });
+	window.addEventListener('onEmbeddedMessagingInvitationRejected', function (e) { ESWMenu.logEvent('onEmbeddedMessagingInvitationRejected', e.detail); });
 
-	// Button & Window Events
-	window.addEventListener("onEmbeddedMessagingButtonCreated", (event) => {
-		console.log("Chat Button Created:", event.detail);
-		logEvent("onEmbeddedMessagingButtonCreated", event.detail);
-	});
+	// Verification
+	window.addEventListener('onEmbeddedMessagingIdentityTokenExpired', function (e) { ESWMenu.logEvent('onEmbeddedMessagingIdentityTokenExpired', e.detail); });
 
-	window.addEventListener("onEmbeddedMessagingButtonClicked", (event) => {
-		console.log("Chat Button Clicked:", event.detail);
-		logEvent("onEmbeddedMessagingButtonClicked", event.detail);
-	});
+	// Transcripts
+	window.addEventListener('onEmbeddedMessagingTranscriptRequested',            function (e) { ESWMenu.logEvent('onEmbeddedMessagingTranscriptRequested',            e.detail); });
+	window.addEventListener('onEmbeddedMessagingTranscriptDownloadSuccessful',   function (e) { ESWMenu.logEvent('onEmbeddedMessagingTranscriptDownloadSuccessful',   e.detail); });
+	window.addEventListener('onEmbeddedMessagingTranscriptRequestFailed',        function (e) { ESWMenu.logEvent('onEmbeddedMessagingTranscriptRequestFailed',        e.detail); });
+</script>
 
-	window.addEventListener("onEmbeddedMessagingWindowClosed", (event) => {
-		console.log("Chat Window Closed:", event.detail);
-		logEvent("onEmbeddedMessagingWindowClosed", event.detail);
-	});
+<!-- ── Shared menu component (must load before bootstrap so that
+     ESWMenu.init() has run before initEmbeddedMessaging() is called) ── -->
+<script src="esw-page-menu.js"></script>
 
-	window.addEventListener("onEmbeddedMessagingWindowMinimized", (event) => {
-		console.log("Chat Window Minimized:", event.detail);
-		logEvent("onEmbeddedMessagingWindowMinimized", event.detail);
-	});
-
-	window.addEventListener("onEmbeddedMessagingWindowMaximized", (event) => {
-		console.log("Chat Window Maximized:", event.detail);
-		logEvent("onEmbeddedMessagingWindowMaximized", event.detail);
-	});
-
-	// Message Events
-	window.addEventListener("onEmbeddedMessageSent", (event) => {
-		console.log("Message Sent:", event.detail);
-		logEvent("onEmbeddedMessageSent", event.detail);
-	});
-
-	window.addEventListener("onEmbeddedMessageDelivered", (event) => {
-		console.log("Message Delivered:", event.detail);
-		logEvent("onEmbeddedMessageDelivered", event.detail);
-	});
-
-	window.addEventListener("onEmbeddedMessageRead", (event) => {
-		console.log("Message Read:", event.detail);
-		logEvent("onEmbeddedMessageRead", event.detail);
-	});
-
-	window.addEventListener("onEmbeddedMessageLinkClicked", (event) => {
-		console.log("Message Link Clicked:", event.detail);
-		logEvent("onEmbeddedMessageLinkClicked", event.detail);
-	});
-
-	// Routing & Participant Events
-	window.addEventListener("onEmbeddedMessagingConversationRouted", (event) => {
-		console.log("Conversation Routed:", event.detail);
-		logEvent("onEmbeddedMessagingConversationRouted", event.detail);
-	});
-
-	window.addEventListener("onEmbeddedMessagingConversationParticipantChanged", (event) => {
-		console.log("Conversation Participant Changed:", event.detail);
-		logEvent("onEmbeddedMessagingConversationParticipantChanged", event.detail);
-	});
-
-	// Bot & Pre-Chat Events
-	window.addEventListener("onEmbeddedMessagingFirstBotMessageSent", (event) => {
-		console.log("First Bot Message Sent:", event.detail);
-		logEvent("onEmbeddedMessagingFirstBotMessageSent", event.detail);
-	});
-
-	window.addEventListener("onEmbeddedMessagingPreChatLoaded", (event) => {
-		console.log("Pre-Chat Loaded:", event.detail);
-		logEvent("onEmbeddedMessagingPreChatLoaded", event.detail);
-	});
-
-	window.addEventListener("onEmbeddedMessagingPreChatSubmitted", (event) => {
-		console.log("Pre-Chat Submitted:", event.detail);
-		logEvent("onEmbeddedMessagingPreChatSubmitted", event.detail);
-	});
-
-	// Invitation Events
-	window.addEventListener("onEmbeddedMessagingInvitationShown", (event) => {
-		console.log("Invitation Shown:", event.detail);
-		logEvent("onEmbeddedMessagingInvitationShown", event.detail);
-	});
-
-	window.addEventListener("onEmbeddedMessagingInvitationAccepted", (event) => {
-		console.log("Invitation Accepted:", event.detail);
-		logEvent("onEmbeddedMessagingInvitationAccepted", event.detail);
-	});
-
-	window.addEventListener("onEmbeddedMessagingInvitationRejected", (event) => {
-		console.log("Invitation Rejected:", event.detail);
-		logEvent("onEmbeddedMessagingInvitationRejected", event.detail);
-	});
-
-	// Verification Events
-	window.addEventListener("onEmbeddedMessagingIdentityTokenExpired", (event) => {
-		console.log("Identity Token Expired:", event.detail);
-		logEvent("onEmbeddedMessagingIdentityTokenExpired", event.detail);
-	});
-
-	// Transcript Events
-	window.addEventListener("onEmbeddedMessagingTranscriptRequested", (event) => {
-		console.log("Transcript Requested:", event.detail);
-		logEvent("onEmbeddedMessagingTranscriptRequested", event.detail);
-	});
-
-	window.addEventListener("onEmbeddedMessagingTranscriptDownloadSuccessful", (event) => {
-		console.log("Transcript Download Successful:", event.detail);
-		logEvent("onEmbeddedMessagingTranscriptDownloadSuccessful", event.detail);
-	});
-
-	window.addEventListener("onEmbeddedMessagingTranscriptRequestFailed", (event) => {
-		console.log("Transcript Request Failed:", event.detail);
-		logEvent("onEmbeddedMessagingTranscriptRequestFailed", event.detail);
+<script>
+	// ── Initialize the Page Settings panel for this specific page ────────
+	ESWMenu.init({
+		pageTitle: 'Page Settings',
+		configDetails: {
+			rows: [
+				{ label: 'Org Name', value: 'Agentforceweb' },
+				{ label: 'Org ID',   value: '00DWs00000CvEVZ' },
+				{
+					label: 'Embedded Service Name',
+					link:  'https://agentforceweb.demo.my.salesforce-setup.com/lightning/setup/EmbeddedServiceDeployments/04IWs000000CeCzMAK/view',
+					value: 'MIAW-Direct to Service Rep'
+				},
+				{
+					label:  'Messaging Channel',
+					prefix: 'MIAW - Direct to Service Rep',
+					links: [
+						{ href: 'https://agentforceweb.demo.my.salesforce-setup.com/lightning/setup/LiveMessageSetup/0MjWs000001FdOfKAK/view?lightning__channelType=', text: 'view' },
+						{ href: 'https://agentforceweb.demo.my.salesforce-setup.com/lightning/setup/LiveMessageSetup/0MjWs000001FdOfKAK/view?lightning__channelType=EmbeddedMessaging', text: 'edit' }
+					]
+				},
+				{
+					label: 'Routing Type',
+					link:  'https://agentforceweb.demo.my.salesforce-setup.com/lightning/setup/Flows/page?address=%2F300Ws00000zsj9tIAA%3FretUrl%3D%2Flightning%2Fsetup%2FFlows%2Fhome',
+					value: 'Flow - Messaging Session Omni-Flow'
+				},
+				{
+					label: 'Github Page',
+					link:  'https://github.com/pchungesw/pchungesw.github.io/blob/main/agentforceweb_d2a.html',
+					value: 'click here'
+				}
+			]
+		},
+		deploymentSettings: {
+			enabled: true,
+			defaults: {
+				orgId:          '00DWs00000CvEVZ',
+				deploymentName: 'MIAW_Direct_to_Service_Rep',
+				siteEndpoint:   'https://agentforceweb.demo.my.site.com/ESWMIAWDirecttoService1749749039230',
+				scrt2URL:       'https://agentforceweb.demo.my.salesforce-scrt.com'
+			}
+		},
+		prechat:              { enabled: true },
+		chatButtonVisibility: { enabled: true },
+		hiddenPrechat:        { enabled: true },
+		eventLog:             { enabled: true }
 	});
 </script>
-<script type='text/javascript' src='https://agentforceweb.demo.my.site.com/ESWMIAWDirecttoService1749749039230/assets/js/bootstrap.min.js' onload='initEmbeddedMessaging()'></script>
 
-
+<!-- ── Dynamically load bootstrap.min.js so the URL can be overridden
+     by Deployment Settings without hard-coding it in the HTML ─────── -->
+<script>
+	(function () {
+		var s = document.createElement('script');
+		s.type = 'text/javascript';
+		s.src  = ESWMenu.getBootstrapURL(
+			'https://agentforceweb.demo.my.site.com/ESWMIAWDirecttoService1749749039230'
+		);
+		s.onload = initEmbeddedMessaging;
+		document.head.appendChild(s);
+	}());
+</script>
 
 </body>
 </html>
