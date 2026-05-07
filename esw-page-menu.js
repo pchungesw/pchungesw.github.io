@@ -277,38 +277,54 @@
             <span id="eswDeployIcon">&#9660;</span>
           </div>
           <div class="esw-collapsible-content" id="eswDeployContent">
-            <p class="slds-text-body_small slds-text-color_weak" style="margin-bottom:1rem;">
-              Override the default deployment configuration. Click <strong>Update</strong> to
-              reload the page with the new settings applied.
-            </p>
+
             <div class="esw-form-field">
-              <label for="eswDeployOrgId">Org ID</label>
-              <input type="text" id="eswDeployOrgId" maxlength="15"
-                     placeholder="15-character Org ID"
-                     value="${d.orgId || ""}"
-                     class="slds-input">
+              <label for="eswDeploySnippet">Paste Code Snippet</label>
+              <p class="slds-text-body_small slds-text-color_weak" style="margin:0.25rem 0 0.5rem;">
+                In Salesforce Setup, open your Embedded Service deployment and copy the code snippet
+                from the <strong>Code Snippets</strong> section. Paste the entire snippet (or just the
+                <code>embeddedservice_bootstrap.init(...)</code> block) below &mdash; the fields will
+                be populated automatically.
+              </p>
+              <textarea id="eswDeploySnippet" rows="5"
+                        placeholder="Paste the embeddedservice_bootstrap.init(...) block or the full &lt;script&gt; snippet here..."
+                        class="slds-input"
+                        style="font-family:monospace;font-size:0.8rem;resize:vertical;width:100%;box-sizing:border-box;"
+                        oninput="ESWMenu._parseSnippet()"></textarea>
+              <p id="eswSnippetStatus" style="font-size:0.8rem;margin-top:0.25rem;min-height:1.2em;"></p>
             </div>
-            <div class="esw-form-field">
-              <label for="eswDeployApiName">Deployment API Name</label>
-              <input type="text" id="eswDeployApiName" maxlength="18"
-                     placeholder="Embedded Service Deployment API name"
-                     value="${d.deploymentName || ""}"
-                     class="slds-input">
+
+            <div id="eswDeployFields">
+              <div class="esw-form-field">
+                <label for="eswDeployOrgId">Org ID</label>
+                <input type="text" id="eswDeployOrgId" maxlength="15"
+                       placeholder="15-character Org ID"
+                       value="${d.orgId || ""}"
+                       class="slds-input">
+              </div>
+              <div class="esw-form-field">
+                <label for="eswDeployApiName">Deployment API Name</label>
+                <input type="text" id="eswDeployApiName" maxlength="18"
+                       placeholder="Embedded Service Deployment API name"
+                       value="${d.deploymentName || ""}"
+                       class="slds-input">
+              </div>
+              <div class="esw-form-field">
+                <label for="eswDeploySiteEndpoint">Site Endpoint</label>
+                <input type="url" id="eswDeploySiteEndpoint"
+                       placeholder="https://example.my.site.com/ESWDeploymentName"
+                       value="${d.siteEndpoint || ""}"
+                       class="slds-input">
+              </div>
+              <div class="esw-form-field">
+                <label for="eswDeployScrt2">SCRT2 Endpoint</label>
+                <input type="url" id="eswDeployScrt2"
+                       placeholder="https://example.my.salesforce-scrt.com"
+                       value="${d.scrt2URL || ""}"
+                       class="slds-input">
+              </div>
             </div>
-            <div class="esw-form-field">
-              <label for="eswDeploySiteEndpoint">Site Endpoint</label>
-              <input type="url" id="eswDeploySiteEndpoint"
-                     placeholder="https://example.my.site.com/ESWDeploymentName…"
-                     value="${d.siteEndpoint || ""}"
-                     class="slds-input">
-            </div>
-            <div class="esw-form-field">
-              <label for="eswDeployScrt2">SCRT2 Endpoint</label>
-              <input type="url" id="eswDeployScrt2"
-                     placeholder="https://example.my.salesforce-scrt.com"
-                     value="${d.scrt2URL || ""}"
-                     class="slds-input">
-            </div>
+
             <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem;">
               <button class="slds-button slds-button_brand" onclick="ESWMenu._applyDeploymentSettings()">Update</button>
               <button class="slds-button slds-button_neutral" id="eswClearOverrideBtn"
@@ -673,6 +689,90 @@
         var existing = document.getElementById("eswConfigOverrideBanner");
         if (existing) existing.parentNode.removeChild(existing);
       }
+    },
+
+    /* Parse a pasted code snippet and populate the four individual fields.
+     *
+     * Accepts either:
+     *   - The full <script> block from the ESW Code Snippets page, or
+     *   - Just the embeddedservice_bootstrap.init(...) call.
+     *
+     * The init() call always has this positional signature:
+     *   embeddedservice_bootstrap.init(
+     *     '<orgId>',
+     *     '<deploymentName>',
+     *     '<siteEndpoint>',
+     *     { scrt2URL: '<scrt2URL>' }
+     *   );
+     */
+    _parseSnippet: function () {
+      const raw    = (document.getElementById("eswDeploySnippet").value || "");
+      const status = document.getElementById("eswSnippetStatus");
+
+      if (!raw.trim()) {
+        status.textContent = "";
+        return;
+      }
+
+      // Extract the argument list inside embeddedservice_bootstrap.init( ... )
+      // Use a regex that captures everything between the opening ( and the matching )
+      // We look for the init call, then grab up to the closing )
+      const initMatch = raw.match(/embeddedservice_bootstrap\s*\.\s*init\s*\(([\s\S]*?)\)\s*;/);
+      if (!initMatch) {
+        status.style.color = "#c23934";
+        status.textContent = "Could not find embeddedservice_bootstrap.init(...) in the pasted text.";
+        return;
+      }
+
+      const args = initMatch[1]; // everything between the outer ( and )
+
+      // Pull out all single- or double-quoted string values in order
+      const strings = [];
+      const strRe = /['"]([^'"]+)['"]/g;
+      let m;
+      while ((m = strRe.exec(args)) !== null) {
+        strings.push(m[1]);
+      }
+
+      // Expected order: orgId, deploymentName, siteEndpoint, scrt2URL
+      // The scrt2URL is inside the options object { scrt2URL: '...' } but still
+      // the 4th quoted string encountered when reading left-to-right.
+      if (strings.length < 4) {
+        status.style.color = "#c23934";
+        status.textContent = "Parsed " + strings.length + " of 4 expected values. Check the snippet and try again.";
+        return;
+      }
+
+      const orgId          = strings[0];
+      const deploymentName = strings[1];
+      const siteEndpoint   = strings[2];
+      const scrt2URL       = strings[3];
+
+      // Basic sanity checks
+      if (!/^[a-zA-Z0-9]{15}$/.test(orgId)) {
+        status.style.color = "#c23934";
+        status.textContent = "Org ID \"" + orgId + "\" doesn't look like a 15-character Salesforce ID. Check the snippet.";
+        return;
+      }
+      try { new URL(siteEndpoint); } catch (e) {
+        status.style.color = "#c23934";
+        status.textContent = "Site Endpoint \"" + siteEndpoint + "\" is not a valid URL.";
+        return;
+      }
+      try { new URL(scrt2URL); } catch (e) {
+        status.style.color = "#c23934";
+        status.textContent = "SCRT2 URL \"" + scrt2URL + "\" is not a valid URL.";
+        return;
+      }
+
+      // Populate the individual fields
+      document.getElementById("eswDeployOrgId").value        = orgId;
+      document.getElementById("eswDeployApiName").value      = deploymentName;
+      document.getElementById("eswDeploySiteEndpoint").value = siteEndpoint;
+      document.getElementById("eswDeployScrt2").value        = scrt2URL;
+
+      status.style.color = "#2e844a";
+      status.textContent = "✓ All 4 values parsed successfully. Review below, then click Update.";
     },
 
     _applyDeploymentSettings: function () {
