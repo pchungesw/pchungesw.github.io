@@ -827,14 +827,26 @@
       const isChecked = document.getElementById("eswChatButtonToggle").checked;
       if (typeof embeddedservice_bootstrap !== "undefined" && embeddedservice_bootstrap.utilAPI) {
         const method = isChecked ? "showChatButton" : "hideChatButton";
-        embeddedservice_bootstrap.utilAPI[method]()
-          .then(function () {
+        try {
+          const result = embeddedservice_bootstrap.utilAPI[method]();
+          // The API may be synchronous or return a Promise depending on the version
+          if (result && typeof result.then === "function") {
+            result
+              .then(function () {
+                ESWMenu.showToast(isChecked ? "Chat button visible" : "Chat button hidden", "success");
+              })
+              .catch(function () {
+                ESWMenu.showToast("Unable to " + (isChecked ? "show" : "hide") + " chat button", "error");
+                document.getElementById("eswChatButtonToggle").checked = !isChecked;
+              });
+          } else {
+            // Synchronous — just show the toast directly
             ESWMenu.showToast(isChecked ? "Chat button visible" : "Chat button hidden", "success");
-          })
-          .catch(function () {
-            ESWMenu.showToast("Unable to " + (isChecked ? "show" : "hide") + " chat button", "error");
-            document.getElementById("eswChatButtonToggle").checked = !isChecked;
-          });
+          }
+        } catch (e) {
+          ESWMenu.showToast("Unable to " + (isChecked ? "show" : "hide") + " chat button", "error");
+          document.getElementById("eswChatButtonToggle").checked = !isChecked;
+        }
       } else {
         ESWMenu.showToast("Chat is not ready yet", "info");
         document.getElementById("eswChatButtonToggle").checked = !isChecked;
