@@ -415,22 +415,21 @@
 		// Hide placeholder in the right column once the component is mounted
 		document.getElementById('inline-chat-container').classList.add('chat-active');
 
-		if (currentDisplayMode === 'inline') {
-			// Inline mode: auto-launch (shows pre-chat form or resumes existing session)
-			try {
-				embeddedservice_bootstrap.utilAPI.launchChat();
-			} catch (e) { console.error('Error auto-launching chat:', e); }
-		} else {
+		if (currentDisplayMode !== 'inline') {
 			// Shelf mode: app is ready; surface the Start Chat button
 			setShelfState('ready');
 		}
+		// Inline mode: launchChat() must wait until onEmbeddedMessagingButtonCreated
+		// fires — the utilAPI is not available until that point.
 	});
 
 	// Conversation Status
 	window.addEventListener('onEmbeddedMessagingConversationStarted', function (e) { ESWMenu.logEvent('onEmbeddedMessagingConversationStarted', e.detail); });
 	window.addEventListener('onEmbeddedMessagingConversationOpened',  function (e) {
 		ESWMenu.logEvent('onEmbeddedMessagingConversationOpened', e.detail);
-		// An existing conversation was found on page load — surface it immediately
+		// An existing conversation was found on page load — surface it immediately.
+		// onEmbeddedMessagingConversationOpened fires after onEmbeddedMessagingButtonCreated
+		// so launchChat() is safe to call here.
 		if (currentDisplayMode === 'inline') {
 			try {
 				embeddedservice_bootstrap.utilAPI.launchChat();
@@ -449,7 +448,17 @@
 	window.addEventListener('onEmbeddedMessagingBusinessHoursEnded',   function (e) { ESWMenu.logEvent('onEmbeddedMessagingBusinessHoursEnded',   e.detail); });
 
 	// Button & Window
-	window.addEventListener('onEmbeddedMessagingButtonCreated',   function (e) { ESWMenu.logEvent('onEmbeddedMessagingButtonCreated',   e.detail); });
+	window.addEventListener('onEmbeddedMessagingButtonCreated',   function (e) {
+		ESWMenu.logEvent('onEmbeddedMessagingButtonCreated', e.detail);
+		// utilAPI.launchChat() is only safe to call after this event.
+		// In inline mode, auto-launch the chat now (shows pre-chat form or
+		// resumes an existing session if onConversationOpened fires after this).
+		if (currentDisplayMode === 'inline') {
+			try {
+				embeddedservice_bootstrap.utilAPI.launchChat();
+			} catch (e) { console.error('Error auto-launching chat:', e); }
+		}
+	});
 	window.addEventListener('onEmbeddedMessagingButtonClicked',   function (e) { ESWMenu.logEvent('onEmbeddedMessagingButtonClicked',   e.detail); });
 	window.addEventListener('onEmbeddedMessagingWindowClosed',    function (e) { ESWMenu.logEvent('onEmbeddedMessagingWindowClosed',    e.detail); });
 	window.addEventListener('onEmbeddedMessagingWindowMinimized', function (e) { ESWMenu.logEvent('onEmbeddedMessagingWindowMinimized', e.detail); });
