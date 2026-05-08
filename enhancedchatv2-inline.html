@@ -120,51 +120,28 @@
 	}
 	.labs-subheading a:hover { text-decoration: underline; }
 
-	/* ── Card row ────────────────────────────────────────────────────────── */
-	.labs-cards {
-		display: flex;
-		gap: 1rem;
-		flex-wrap: wrap;
-		align-items: flex-start;
-		margin-bottom: 2.5rem;
+	/* ── Marketing text block ───────────────────────────────────────────── */
+	.labs-marketing {
+		margin: 2rem 0 0;
+		padding: 1.5rem;
+		border-left: 3px solid rgba(130,70,255,0.7);
+		background: rgba(130,70,255,0.06);
+		border-radius: 0 10px 10px 0;
 	}
-	.labs-card {
-		background: rgba(255,255,255,0.05);
-		border: 1px solid rgba(130,70,255,0.35);
-		border-radius: 12px;
-		padding: 1rem 1.25rem;
-		width: 200px;
-		cursor: pointer;
-		transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
-		box-shadow: 0 0 0 0 rgba(130,70,255,0);
+	.labs-marketing-label {
+		font-size: 0.7rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: #a070f0;
+		margin: 0 0 0.6rem;
 	}
-	.labs-card:hover {
-		background: rgba(130,70,255,0.12);
-		border-color: rgba(160,100,255,0.7);
-		box-shadow: 0 0 18px rgba(130,70,255,0.25);
-	}
-	.labs-card.active {
-		background: rgba(130,70,255,0.15);
-		border-color: rgba(160,100,255,0.9);
-		box-shadow: 0 0 24px rgba(130,70,255,0.35);
-	}
-	.labs-card-icon {
-		font-size: 1.25rem;
-		margin-bottom: 0.5rem;
-	}
-	.labs-card-title {
-		font-size: 0.875rem;
-		font-weight: 600;
-		color: #fff;
-		margin: 0 0 0.25rem;
-	}
-	.labs-card-desc {
-		font-size: 0.75rem;
-		color: #8888a8;
+	.labs-marketing-body {
+		font-size: 0.95rem;
+		color: #b8b8d0;
+		line-height: 1.7;
 		margin: 0;
-		line-height: 1.5;
 	}
-
 
 	/* ── Chat action button ──────────────────────────────────────────────── */
 	#chatActionBtn {
@@ -236,29 +213,14 @@
 			<p class="labs-subheading">Inline mode demo powered by <a href="https://www.salesforce.com/agentforce/" target="_blank">Agentforce.</a></p>
 			<p class="labs-subheading"><a href="agentforceweb_d2a.html">Click here</a> to view this conversation in overlay mode.</p>
 
-			<!-- Feature cards -->
-			<div class="labs-cards">
-				<div class="labs-card active">
-					<div class="labs-card-icon">💬</div>
-					<p class="labs-card-title">Embedded Chat</p>
-					<p class="labs-card-desc">Chat renders directly within the page or in a slide-in shelf.</p>
-				</div>
-				<div class="labs-card">
-					<div class="labs-card-icon">🔍</div>
-					<p class="labs-card-title">Session Context</p>
-					<p class="labs-card-desc">Pass search queries as context to the agent before the conversation starts.</p>
-				</div>
+			<!-- Marketing copy -->
+			<div class="labs-marketing">
+				<p class="labs-marketing-label">Inline Mode</p>
+				<p class="labs-marketing-body">The chat widget is embedded directly within the page layout — no overlay, no pop-up. It lives alongside your content, giving customers a seamless, in-context support experience without ever leaving the page.</p>
 			</div>
 
-			<!-- ── Chat action button ────────────────────────────────────────
-			     State machine (shelf mode only):
-			       'pre-init'  → "Start Chat"    → bootstraps app; onReady → 'open'
-			       'open'      → "Minimize Chat" → slides shelf off-screen
-			       'minimized' → "Open Chat"     → slides shelf back in
-			     Hidden entirely in inline mode (chat auto-launches).          -->
-			<div>
-				<button id="chatActionBtn" onclick="handleChatAction()">Start Chat</button>
-			</div>
+			<!-- Hidden button kept in DOM for shelf-mode state machine -->
+			<button id="chatActionBtn" onclick="handleChatAction()" style="display:none;">Start Chat</button>
 		</div>
 
 		<!-- Right column: chat renders here in inline mode; placeholder in shelf mode -->
