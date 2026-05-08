@@ -622,7 +622,7 @@
             <div class="esw-toggle-row">
               <label>Display Mode</label>
               <label class="esw-toggle">
-                <input type="checkbox" id="eswDisplayModeToggle">
+                <input type="checkbox" id="eswDisplayModeToggle" onchange="ESWMenu._updateDisplayModeLabel()">
                 <span class="esw-toggle-track"></span>
               </label>
               <span class="esw-toggle-label" id="eswDisplayModeLabel">Inline</span>
@@ -630,7 +630,7 @@
             <div class="esw-toggle-row" style="margin-bottom:1.25rem;">
               <label>Chat Header</label>
               <label class="esw-toggle">
-                <input type="checkbox" id="eswHeaderEnabledToggle" checked>
+                <input type="checkbox" id="eswHeaderEnabledToggle" checked onchange="ESWMenu._updateHeaderLabel()">
                 <span class="esw-toggle-track"></span>
               </label>
               <span class="esw-toggle-label" id="eswHeaderLabel">Enabled</span>
@@ -1260,6 +1260,24 @@
           }
         }
       } catch (e) { /* localStorage not available */ }
+    },
+
+    /** Update the Display Mode label when the toggle changes. */
+    _updateDisplayModeLabel: function () {
+      const toggle = document.getElementById("eswDisplayModeToggle");
+      const label  = document.getElementById("eswDisplayModeLabel");
+      if (toggle && label) {
+        label.textContent = toggle.checked ? "Shelf" : "Inline";
+      }
+    },
+
+    /** Update the Chat Header label when the toggle changes. */
+    _updateHeaderLabel: function () {
+      const toggle = document.getElementById("eswHeaderEnabledToggle");
+      const label  = document.getElementById("eswHeaderLabel");
+      if (toggle && label) {
+        label.textContent = toggle.checked ? "Enabled" : "Disabled";
+      }
     },
 
     /**
