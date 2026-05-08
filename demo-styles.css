@@ -13,6 +13,12 @@ body {
 	overflow-x: hidden;
 }
 
+/* When the ESW navbar is present, remove body padding so the fixed
+   nav sits flush at the top of the viewport */
+body:has(#esw-nav) {
+	padding: 0;
+}
+
 .page-header {
 	text-align: center;
 	margin-bottom: 2rem;

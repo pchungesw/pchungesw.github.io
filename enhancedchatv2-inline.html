@@ -1,0 +1,627 @@
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, user-scalable=0">
+<title>Enhanced Chat v2 - Inline Mode Demo</title>
+<link rel="icon" type="image/png" href="image/favicon.png">
+<link rel="stylesheet" href="demo-styles.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+	/* ── Agentforce Labs–inspired theme ──────────────────────────────────── */
+
+	*, *::before, *::after { box-sizing: border-box; }
+
+	body {
+		margin: 0;
+		min-height: 100vh;
+		font-family: 'Inter', 'Segoe UI', sans-serif;
+		background-color: #0d0d12;
+		color: #e8e8f0;
+		/* Grid overlay */
+		background-image:
+			linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+		background-size: 40px 40px;
+		overflow-x: hidden;
+	}
+
+	/* ── Purple radial glow (upper-left, like the screenshot) ───────────── */
+	body::before {
+		content: '';
+		position: fixed;
+		top: -20%;
+		left: -10%;
+		width: 70vw;
+		height: 70vh;
+		background: radial-gradient(ellipse at center, rgba(120,40,200,0.35) 0%, rgba(80,20,160,0.15) 45%, transparent 70%);
+		pointer-events: none;
+		z-index: 0;
+	}
+
+	/* ── Glowing orb (lower-right, decorative) ───────────────────────────── */
+	body::after {
+		content: '';
+		position: fixed;
+		bottom: 5%;
+		right: 5%;
+		width: 320px;
+		height: 320px;
+		background: radial-gradient(circle at center, rgba(200,130,255,0.55) 0%, rgba(170,80,255,0.25) 40%, transparent 70%);
+		border-radius: 50%;
+		filter: blur(32px);
+		pointer-events: none;
+		z-index: 0;
+	}
+
+	/* ── Main page layout ────────────────────────────────────────────────── */
+	#page-content {
+		position: relative;
+		z-index: 1;
+		padding: 52px 3rem 2rem;   /* top: clear fixed nav; sides: breathing room */
+		height: 100vh;
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+		box-sizing: border-box;
+	}
+
+	/* ── 30 / 70 split layout ────────────────────────────────────────────── */
+	#content-wrapper {
+		display: flex;
+		align-items: stretch;
+		gap: 2rem;
+		flex: 1;          /* fill remaining height below padding */
+		min-height: 0;    /* allow flex children to shrink below content size */
+	}
+	#content-left {
+		flex: 0 0 30%;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		min-width: 0;
+	}
+	/* Right panel — always visible; chat renders here in inline mode */
+	#inline-chat-container {
+		flex: 1;           /* takes the remaining 70% */
+		min-width: 0;
+		border: 1px solid rgba(130,70,255,0.25);
+		border-radius: 12px;
+		overflow: hidden;
+		position: relative;
+		box-shadow: 0 0 40px rgba(100,40,200,0.15);
+		background: rgba(255,255,255,0.015);
+	}
+	/* Placeholder — centred inside the panel when chat isn't active */
+	#inline-chat-placeholder {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.75rem;
+		opacity: 0.35;
+		pointer-events: none;
+		user-select: none;
+	}
+	#inline-chat-placeholder svg {
+		width: 48px;
+		height: 48px;
+		color: #a070f0;
+	}
+	#inline-chat-placeholder p {
+		font-size: 0.85rem;
+		color: #a0a0b8;
+		margin: 0;
+	}
+	/* Hide placeholder once the chat component is mounted */
+	#inline-chat-container.chat-active #inline-chat-placeholder {
+		display: none;
+	}
+
+	/* ── Hero text ───────────────────────────────────────────────────────── */
+	.labs-heading {
+		font-size: 2.75rem;
+		font-weight: 700;
+		color: #ffffff;
+		margin: 0 0 0.5rem;
+		letter-spacing: -0.02em;
+		line-height: 1.15;
+	}
+	.labs-subheading {
+		font-size: 0.95rem;
+		color: #a0a0b8;
+		margin: 0 0 2rem;
+		font-weight: 400;
+	}
+	.labs-subheading a {
+		color: #a070f0;
+		text-decoration: none;
+		font-weight: 500;
+	}
+	.labs-subheading a:hover { text-decoration: underline; }
+
+	/* ── Card row ────────────────────────────────────────────────────────── */
+	.labs-cards {
+		display: flex;
+		gap: 1rem;
+		flex-wrap: wrap;
+		align-items: flex-start;
+		margin-bottom: 2.5rem;
+	}
+	.labs-card {
+		background: rgba(255,255,255,0.05);
+		border: 1px solid rgba(130,70,255,0.35);
+		border-radius: 12px;
+		padding: 1rem 1.25rem;
+		width: 200px;
+		cursor: pointer;
+		transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+		box-shadow: 0 0 0 0 rgba(130,70,255,0);
+	}
+	.labs-card:hover {
+		background: rgba(130,70,255,0.12);
+		border-color: rgba(160,100,255,0.7);
+		box-shadow: 0 0 18px rgba(130,70,255,0.25);
+	}
+	.labs-card.active {
+		background: rgba(130,70,255,0.15);
+		border-color: rgba(160,100,255,0.9);
+		box-shadow: 0 0 24px rgba(130,70,255,0.35);
+	}
+	.labs-card-icon {
+		font-size: 1.25rem;
+		margin-bottom: 0.5rem;
+	}
+	.labs-card-title {
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: #fff;
+		margin: 0 0 0.25rem;
+	}
+	.labs-card-desc {
+		font-size: 0.75rem;
+		color: #8888a8;
+		margin: 0;
+		line-height: 1.5;
+	}
+
+
+	/* ── Chat action button ──────────────────────────────────────────────── */
+	#chatActionBtn {
+		background: linear-gradient(135deg, #7b2ff7, #5a1bc2) !important;
+		border: none !important;
+		border-radius: 8px !important;
+		color: #fff !important;
+		font-family: inherit !important;
+		font-size: 0.875rem !important;
+		font-weight: 600 !important;
+		padding: 0.6rem 1.5rem !important;
+		cursor: pointer;
+		box-shadow: 0 0 16px rgba(123,47,247,0.4);
+		transition: box-shadow 0.2s, transform 0.15s, opacity 0.2s;
+		letter-spacing: 0.01em;
+	}
+	#chatActionBtn:hover {
+		box-shadow: 0 0 28px rgba(123,47,247,0.65);
+		transform: translateY(-1px);
+	}
+	#chatActionBtn:active { transform: translateY(0); }
+
+	/* ── Slide-in shelf ──────────────────────────────────────────────────── */
+	#chat-shelf {
+		position: fixed;
+		top: 0;
+		right: 0;
+		width: 600px;
+		height: 100vh;
+		z-index: 1000;
+		background: #13121a;
+		border-left: 1px solid rgba(130,70,255,0.3);
+		box-shadow: -8px 0 40px rgba(80,20,180,0.25);
+		transform: translateX(600px);
+		transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+	#chat-shelf.shelf-open {
+		transform: translateX(0);
+	}
+	#shelf-chat-container {
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+		position: relative;
+	}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     The Page Settings slide-panel (☰ Menu) is injected entirely by
+     esw-page-menu.js via ESWMenu.init() near the bottom of this file.
+     To change the panel UI, edit ONLY esw-page-menu.js — changes apply
+     to every page that includes it.
+════════════════════════════════════════════════════════════════════════ -->
+
+<!-- ── Slide-in shelf (right-side panel, no header) ──────────────────── -->
+<div id="chat-shelf">
+	<div id="shelf-chat-container"></div>
+</div>
+
+<!-- ── Main page content ──────────────────────────────────────────────── -->
+<div id="page-content">
+	<div id="content-wrapper">
+
+		<!-- Left column: hero text + cards + button -->
+		<div id="content-left">
+			<h1 class="labs-heading">Enhanced Chat v2</h1>
+			<p class="labs-subheading">Inline mode demo powered by <a href="https://www.salesforce.com/agentforce/" target="_blank">Agentforce.</a></p>
+
+			<!-- Feature cards -->
+			<div class="labs-cards">
+				<div class="labs-card active">
+					<div class="labs-card-icon">💬</div>
+					<p class="labs-card-title">Embedded Chat</p>
+					<p class="labs-card-desc">Chat renders directly within the page or in a slide-in shelf.</p>
+				</div>
+				<div class="labs-card">
+					<div class="labs-card-icon">🔍</div>
+					<p class="labs-card-title">Session Context</p>
+					<p class="labs-card-desc">Pass search queries as context to the agent before the conversation starts.</p>
+				</div>
+			</div>
+
+			<!-- ── Chat action button ────────────────────────────────────────
+			     State machine (shelf mode only):
+			       'pre-init'  → "Start Chat"    → bootstraps app; onReady → 'open'
+			       'open'      → "Minimize Chat" → slides shelf off-screen
+			       'minimized' → "Open Chat"     → slides shelf back in
+			     Hidden entirely in inline mode (chat auto-launches).          -->
+			<div>
+				<button id="chatActionBtn" onclick="handleChatAction()">Start Chat</button>
+			</div>
+		</div>
+
+		<!-- Right column: chat renders here in inline mode; placeholder in shelf mode -->
+		<div id="inline-chat-container">
+			<div id="inline-chat-placeholder">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 0 1 .778-.332 48.294 48.294 0 0 0 5.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
+				</svg>
+				<p>Start Chat to begin</p>
+			</div>
+		</div>
+
+	</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     Page scripts
+════════════════════════════════════════════════════════════════════════ -->
+<script>
+	// ── Default deployment configuration for this page ──────────────────
+	const PAGE_DEPLOY_DEFAULTS = {
+		orgId:          '00DWs00000CvEVZ',
+		deploymentName: 'MIAW_Direct_to_Service_Rep_2',
+		siteEndpoint:   'https://agentforceweb.demo.my.site.com/ESWMIAWDirecttoService1754418132529',
+		scrt2URL:       'https://agentforceweb.demo.my.salesforce-scrt.com'
+	};
+
+	// ── Pre-chat field values (kept in sync by ESWMenu) ──────────────────
+	let prechatValues = {
+		_firstName: { value: 'Peter',                isEditableByEndUser: true },
+		_lastName:  { value: 'Chung',                isEditableByEndUser: true },
+		_email:     { value: 'pchung@salesforce.com', isEditableByEndUser: true },
+		_subject:   { value: 'product question',     isEditableByEndUser: true }
+	};
+
+	// ── Display mode state ───────────────────────────────────────────────
+	// 'shelf'  = slide-in shelf (inline mode, target = #shelf-chat-container)
+	// 'inline' = embedded in page content (inline mode, target = #inline-chat-container)
+	// Resolved from localStorage via ESWMenu.getInlineModeConfig() after ESWMenu loads.
+	// Initialised to 'shelf' as fallback until ESWMenu is available.
+	let currentDisplayMode = 'shelf';
+
+	// Apply the current display mode to the DOM immediately (before bootstrap loads).
+	// - In inline mode:  show the right-column chat container; hide the action button.
+	// - In shelf mode:   right column shows an empty placeholder; button stays visible.
+	function applyDisplayModeToDOM(mode) {
+		const actionBtn = document.getElementById('chatActionBtn');
+		if (mode === 'inline') {
+			if (actionBtn) actionBtn.style.display = 'none';
+		} else {
+			if (actionBtn) actionBtn.style.display = '';
+		}
+	}
+
+
+
+	// ── Shelf chat button state machine ──────────────────────────────────
+	// 'pre-init'  → app not yet bootstrapped; button says "Start Chat"
+	// 'open'      → shelf is visible;          button says "Minimize Chat"
+	// 'minimized' → app running, shelf hidden; button says "Open Chat"
+	let shelfState = 'pre-init';
+
+	function setShelfState(state) {
+		shelfState = state;
+		const btn = document.getElementById('chatActionBtn');
+		if (state === 'pre-init') {
+			btn.textContent = 'Start Chat';
+			document.getElementById('chat-shelf').classList.remove('shelf-open');
+		} else if (state === 'open') {
+			btn.textContent = 'Minimize Chat';
+			document.getElementById('chat-shelf').classList.add('shelf-open');
+		} else if (state === 'minimized') {
+			btn.textContent = 'Open Chat';
+			document.getElementById('chat-shelf').classList.remove('shelf-open');
+		}
+	}
+
+	// ── Unified button handler ───────────────────────────────────────────
+	function handleChatAction() {
+		if (currentDisplayMode === 'inline') {
+			// Inline mode: button always calls launchChat()
+			startChat();
+			return;
+		}
+		// Shelf mode state machine
+		if (shelfState === 'pre-init') {
+			// First click: bootstrap the app — onEmbeddedMessagingReady will
+			// call setShelfState('open') once the component is ready
+			initEmbeddedMessaging();
+		} else if (shelfState === 'open') {
+			setShelfState('minimized');
+		} else if (shelfState === 'minimized') {
+			setShelfState('open');
+		}
+	}
+
+	// ── Shelf open/close helpers (used internally) ───────────────────────
+	function openShelf() {
+		setShelfState('open');
+	}
+	function closeShelf() {
+		if (shelfState !== 'pre-init') setShelfState('minimized');
+	}
+
+	// ── Utility wrappers ─────────────────────────────────────────────────
+	function showToast(message, type) {
+		ESWMenu.showToast(message, type);
+	}
+
+	function handleSearch() {
+		const searchQuery = document.getElementById('searchInput').value;
+		if (!searchQuery.trim()) {
+			showToast('Please enter a search query', 'info');
+			return;
+		}
+		if (typeof embeddedservice_bootstrap !== 'undefined' && embeddedservice_bootstrap.utilAPI) {
+			embeddedservice_bootstrap.utilAPI.setSessionContext({ search: searchQuery })
+				.then(function ()  { showToast('Search context set: "' + searchQuery + '"', 'success'); })
+				.catch(function () { showToast('Unable to set search context', 'error'); });
+		} else {
+			showToast('Chat is not ready yet', 'info');
+		}
+	}
+
+	function startChat() {
+		if (typeof embeddedservice_bootstrap !== 'undefined' && embeddedservice_bootstrap.utilAPI) {
+			embeddedservice_bootstrap.utilAPI.launchChat()
+				.catch(function () { showToast('Unable to start chat', 'error'); });
+		} else {
+			showToast('Chat is not ready yet', 'info');
+		}
+	}
+
+
+	// ── Embedded Messaging init ──────────────────────────────────────────
+	// Always uses inline displayMode. targetElement and headerEnabled are
+	// driven by the persisted inline mode settings from ESWMenu.
+	function initEmbeddedMessaging() {
+		try {
+			const deploy     = ESWMenu.getDeploymentConfig(PAGE_DEPLOY_DEFAULTS);
+			const inlineCfg  = ESWMenu.getInlineModeConfig({ displayMode: 'shelf', headerEnabled: true });
+
+			// Keep page-level state in sync with what was persisted
+			currentDisplayMode = inlineCfg.displayMode;
+
+			embeddedservice_bootstrap.settings.language      = 'en_US';
+			embeddedservice_bootstrap.settings.displayMode   = 'inline';
+			embeddedservice_bootstrap.settings.headerEnabled = inlineCfg.headerEnabled;
+
+			// Target element depends on selected display mode:
+			//   inline → the right-column container (fills the 70% pane)
+			//   shelf  → the shelf's inner container (fills the 600px-wide panel)
+			embeddedservice_bootstrap.settings.targetElement =
+				currentDisplayMode === 'inline'
+					? document.getElementById('inline-chat-container')
+					: document.getElementById('shelf-chat-container');
+
+			embeddedservice_bootstrap.init(
+				deploy.orgId,
+				deploy.deploymentName,
+				deploy.siteEndpoint,
+				{ scrt2URL: deploy.scrt2URL }
+			);
+		} catch (err) {
+			console.error('Error loading Embedded Messaging: ', err);
+		}
+	}
+
+	// ── Embedded Messaging event listeners ──────────────────────────────
+
+	window.addEventListener('onEmbeddedMessagingReady', function () {
+		ESWMenu.logEvent('onEmbeddedMessagingReady', {});
+
+		if (embeddedservice_bootstrap.prechatAPI) {
+			try {
+				embeddedservice_bootstrap.prechatAPI.setVisiblePrechatFields(prechatValues);
+			} catch (e) { console.error('Error with prechatAPI:', e); }
+
+			try {
+				embeddedservice_bootstrap.prechatAPI.setHiddenPrechatFields({ routingDirection: 'Queue' });
+			} catch (e) { console.error('Error setting default routing direction:', e); }
+		}
+
+		// Hide placeholder in the right column once the component is mounted
+		document.getElementById('inline-chat-container').classList.add('chat-active');
+
+		if (currentDisplayMode === 'inline') {
+			// Inline mode: button is already hidden; auto-launch the chat
+			try {
+				embeddedservice_bootstrap.utilAPI.launchChat();
+			} catch (e) { console.error('Error auto-launching chat:', e); }
+		} else if (shelfState === 'pre-init') {
+			// Shelf mode: "Start Chat" was already clicked to trigger init,
+			// so transition to 'open' now that the app is ready.
+			setShelfState('open');
+		}
+	});
+
+	// Conversation Status
+	window.addEventListener('onEmbeddedMessagingConversationStarted', function (e) { ESWMenu.logEvent('onEmbeddedMessagingConversationStarted', e.detail); });
+	window.addEventListener('onEmbeddedMessagingConversationOpened',  function (e) { ESWMenu.logEvent('onEmbeddedMessagingConversationOpened',  e.detail); });
+	window.addEventListener('onEmbeddedMessagingConversationClosed',  function (e) { ESWMenu.logEvent('onEmbeddedMessagingConversationClosed',  e.detail); });
+	window.addEventListener('onEmbeddedMessagingSessionStatusUpdate', function (e) { ESWMenu.logEvent('onEmbeddedMessagingSessionStatusUpdate', e.detail); });
+
+	// Business Hours
+	window.addEventListener('onEmbeddedMessagingWithinBusinessHours',  function (e) { ESWMenu.logEvent('onEmbeddedMessagingWithinBusinessHours',  e.detail); });
+	window.addEventListener('onEmbeddedMessagingBusinessHoursStarted', function (e) { ESWMenu.logEvent('onEmbeddedMessagingBusinessHoursStarted', e.detail); });
+	window.addEventListener('onEmbeddedMessagingBusinessHoursEnded',   function (e) { ESWMenu.logEvent('onEmbeddedMessagingBusinessHoursEnded',   e.detail); });
+
+	// Button & Window
+	window.addEventListener('onEmbeddedMessagingButtonCreated',   function (e) { ESWMenu.logEvent('onEmbeddedMessagingButtonCreated',   e.detail); });
+	window.addEventListener('onEmbeddedMessagingButtonClicked',   function (e) { ESWMenu.logEvent('onEmbeddedMessagingButtonClicked',   e.detail); });
+	window.addEventListener('onEmbeddedMessagingWindowClosed',    function (e) { ESWMenu.logEvent('onEmbeddedMessagingWindowClosed',    e.detail); });
+	window.addEventListener('onEmbeddedMessagingWindowMinimized', function (e) { ESWMenu.logEvent('onEmbeddedMessagingWindowMinimized', e.detail); });
+	window.addEventListener('onEmbeddedMessagingWindowMaximized', function (e) { ESWMenu.logEvent('onEmbeddedMessagingWindowMaximized', e.detail); });
+
+	// Messages
+	window.addEventListener('onEmbeddedMessageSent',        function (e) { ESWMenu.logEvent('onEmbeddedMessageSent',        e.detail); });
+	window.addEventListener('onEmbeddedMessageDelivered',   function (e) { ESWMenu.logEvent('onEmbeddedMessageDelivered',   e.detail); });
+	window.addEventListener('onEmbeddedMessageRead',        function (e) { ESWMenu.logEvent('onEmbeddedMessageRead',        e.detail); });
+	window.addEventListener('onEmbeddedMessageLinkClicked', function (e) { ESWMenu.logEvent('onEmbeddedMessageLinkClicked', e.detail); });
+
+	// Routing & Participants
+	window.addEventListener('onEmbeddedMessagingConversationRouted',             function (e) { ESWMenu.logEvent('onEmbeddedMessagingConversationRouted',             e.detail); });
+	window.addEventListener('onEmbeddedMessagingConversationParticipantChanged', function (e) { ESWMenu.logEvent('onEmbeddedMessagingConversationParticipantChanged', e.detail); });
+
+	// Bot & Pre-Chat
+	window.addEventListener('onEmbeddedMessagingFirstBotMessageSent', function (e) { ESWMenu.logEvent('onEmbeddedMessagingFirstBotMessageSent', e.detail); });
+	window.addEventListener('onEmbeddedMessagingPreChatLoaded',       function (e) { ESWMenu.logEvent('onEmbeddedMessagingPreChatLoaded',       e.detail); });
+	window.addEventListener('onEmbeddedMessagingPreChatSubmitted',    function (e) { ESWMenu.logEvent('onEmbeddedMessagingPreChatSubmitted',    e.detail); });
+
+	// Invitations
+	window.addEventListener('onEmbeddedMessagingInvitationShown',    function (e) { ESWMenu.logEvent('onEmbeddedMessagingInvitationShown',    e.detail); });
+	window.addEventListener('onEmbeddedMessagingInvitationAccepted', function (e) { ESWMenu.logEvent('onEmbeddedMessagingInvitationAccepted', e.detail); });
+	window.addEventListener('onEmbeddedMessagingInvitationRejected', function (e) { ESWMenu.logEvent('onEmbeddedMessagingInvitationRejected', e.detail); });
+
+	// Verification
+	window.addEventListener('onEmbeddedMessagingIdentityTokenExpired', function (e) { ESWMenu.logEvent('onEmbeddedMessagingIdentityTokenExpired', e.detail); });
+
+	// Transcripts
+	window.addEventListener('onEmbeddedMessagingTranscriptRequested',            function (e) { ESWMenu.logEvent('onEmbeddedMessagingTranscriptRequested',            e.detail); });
+	window.addEventListener('onEmbeddedMessagingTranscriptDownloadSuccessful',   function (e) { ESWMenu.logEvent('onEmbeddedMessagingTranscriptDownloadSuccessful',   e.detail); });
+	window.addEventListener('onEmbeddedMessagingTranscriptRequestFailed',        function (e) { ESWMenu.logEvent('onEmbeddedMessagingTranscriptRequestFailed',        e.detail); });
+</script>
+
+<!-- ── Shared menu component (must load before bootstrap so that
+     ESWMenu.init() has run before initEmbeddedMessaging() is called) ── -->
+<script src="esw-page-menu.js"></script>
+
+<script>
+	// ── Initialize the Page Settings panel for this specific page ────────
+	ESWMenu.init({
+		pageTitle: 'Page Settings',
+		navbar: {
+			title: 'Enhanced Chat v2 – Inline Mode',
+			rightSlotHTML: '<input type="text" id="searchInput" placeholder="Search for products…" onkeypress="if(event.key===\'Enter\')handleSearch()">'
+			              + '<button onclick="handleSearch()">Search</button>'
+		},
+		configDetails: {
+			rows: [
+				{ label: 'Org Name', value: 'Agentforceweb' },
+				{ label: 'Org ID',   value: '00DWs00000CvEVZ' },
+				{
+					label: 'Embedded Service Name',
+					link:  'https://agentforceweb.demo.my.salesforce-setup.com/lightning/setup/EmbeddedServiceDeployments/04IWs000000E0eTMAS/view',
+					value: 'MIAW-Direct to Service Rep 2'
+				},
+				{
+					label:  'Messaging Channel',
+					prefix: 'MIAW - Direct to Service Rep',
+					links: [
+						{ href: 'https://agentforceweb.demo.my.salesforce-setup.com/lightning/setup/LiveMessageSetup/0MjWs000001FdOfKAK/view?lightning__channelType=', text: 'view' },
+						{ href: 'https://agentforceweb.demo.my.salesforce-setup.com/lightning/setup/LiveMessageSetup/0MjWs000001FdOfKAK/view?lightning__channelType=EmbeddedMessaging', text: 'edit' }
+					]
+				},
+				{
+					label: 'Routing Type',
+					link:  'https://agentforceweb.demo.my.salesforce-setup.com/lightning/setup/Flows/page?address=%2F300Ws00000zsj9tIAA%3FretUrl%3D%2Flightning%2Fsetup%2FFlows%2Fhome',
+					value: 'Flow - Messaging Session Omni-Flow'
+				},
+				{
+					label: 'Github Page',
+					link:  'https://github.com/pchungesw/pchungesw.github.io/blob/main/enhancedchatv2-inline.html',
+					value: 'click here'
+				}
+			]
+		},
+		deploymentSettings: {
+			enabled: true,
+			defaults: {
+				orgId:          '00DWs00000CvEVZ',
+				deploymentName: 'MIAW_Direct_to_Service_Rep_2',
+				siteEndpoint:   'https://agentforceweb.demo.my.site.com/ESWMIAWDirecttoService1754418132529',
+				scrt2URL:       'https://agentforceweb.demo.my.salesforce-scrt.com'
+			}
+		},
+		prechat:              { enabled: true },
+		chatButtonVisibility: { enabled: true },
+		hiddenPrechat:        { enabled: true },
+		inlineMode:           { enabled: true },
+		eventLog:             { enabled: true }
+	});
+
+</script>
+
+<!-- ── Dynamically load bootstrap.min.js ────────────────────────────────
+     The script always loads on page load so it is ready when needed.
+     - Inline mode: initEmbeddedMessaging() fires immediately on load.
+     - Shelf mode:  initEmbeddedMessaging() is called lazily on the first
+                    "Start Chat" button click; the script is already cached. -->
+<script>
+	(function () {
+		// Peek at the persisted display mode without going through ESWMenu
+		// (ESWMenu may not have called getInlineModeConfig yet at this point).
+		var savedMode = 'shelf';
+		try {
+			var saved = localStorage.getItem('eswInlineModeSettings');
+			if (saved) {
+				var s = JSON.parse(saved);
+				if (s.displayMode) savedMode = s.displayMode;
+			}
+		} catch (e) { /* ignore */ }
+
+		// Apply DOM state immediately (hides button in inline mode, etc.)
+		applyDisplayModeToDOM(savedMode);
+
+		var script = document.createElement('script');
+		script.type = 'text/javascript';
+		script.src  = ESWMenu.getBootstrapURL(
+			'https://agentforceweb.demo.my.site.com/ESWMIAWDirecttoService1754418132529'
+		);
+		script.onload = function () {
+			if (savedMode === 'inline') {
+				// Inline mode: auto-initialise so the component renders immediately
+				initEmbeddedMessaging();
+			}
+			// Shelf mode: wait for the user to click "Start Chat"
+		};
+		document.head.appendChild(script);
+	}());
+</script>
+
+</body>
+</html>

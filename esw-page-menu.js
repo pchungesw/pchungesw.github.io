@@ -62,36 +62,137 @@
     const style = document.createElement("style");
     style.id = "esw-menu-styles";
     style.textContent = `
-      /* ── Slide panel ────────────────────────────────────────────────── */
+      /* ── Nav bar ────────────────────────────────────────────────────── */
+      #esw-nav {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        height: 52px;
+        background: #111118;
+        border-bottom: 1px solid rgba(255,255,255,0.18);
+        box-shadow: 0 1px 20px rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        padding: 0 1.25rem;
+        z-index: 900;
+        gap: 0.75rem;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        box-sizing: border-box;
+      }
+      #esw-nav .esw-nav-logo { flex-shrink: 0; display: flex; align-items: center; }
+      #esw-nav .esw-nav-logo svg { width: 28px; height: 28px; }
+      #esw-nav .esw-nav-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #fff;
+        letter-spacing: 0.01em;
+        white-space: nowrap;
+      }
+      #esw-nav .esw-nav-spacer { flex: 1; }
+      #esw-nav-right-slot { display: flex; align-items: center; gap: 0.4rem; }
+      /* Nav search styling */
+      #esw-nav-right-slot input {
+        background: rgba(255,255,255,0.07);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 6px;
+        padding: 0.35rem 0.75rem;
+        color: #e8e8f0;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        font-size: 0.8rem;
+        width: 220px;
+        outline: none;
+        transition: border-color 0.2s, background 0.2s;
+        box-sizing: border-box;
+      }
+      #esw-nav-right-slot input::placeholder { color: #44445a; }
+      #esw-nav-right-slot input:focus {
+        border-color: rgba(130,70,255,0.6);
+        background: rgba(255,255,255,0.10);
+      }
+      #esw-nav-right-slot button {
+        background: rgba(130,70,255,0.2);
+        border: 1px solid rgba(130,70,255,0.4);
+        border-radius: 6px;
+        color: #c8a0ff;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        font-size: 0.8rem;
+        font-weight: 500;
+        padding: 0.35rem 0.8rem;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background 0.2s, border-color 0.2s;
+      }
+      #esw-nav-right-slot button:hover {
+        background: rgba(130,70,255,0.35);
+        border-color: rgba(160,100,255,0.7);
+      }
+      #esw-nav-menu-slot { display: flex; align-items: center; margin-left: 0.25rem; }
+
+      /* ── Slide panel (dark theme) ───────────────────────────────────── */
       #eswSlidePanel {
         position: fixed;
         left: -700px;
         top: 0;
         width: 700px;
         height: 100vh;
-        background: #fff;
-        box-shadow: 2px 0 8px rgba(0,0,0,0.12);
+        background: #0d0d14;
+        border-right: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 4px 0 32px rgba(0,0,0,0.7);
         transition: left 0.3s ease-in-out;
-        z-index: 1000;
+        z-index: 1100;
         padding: 2rem;
         overflow-y: auto;
         box-sizing: border-box;
+        color: #e8e8f0;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
       }
       #eswSlidePanel.open { left: 0; }
+      #eswSlidePanel h2 {
+        color: #fff;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+      }
 
       /* ── Toggle button ──────────────────────────────────────────────── */
       #eswToggleBtn {
         position: fixed;
         left: 20px;
-        top: 20px;
-        z-index: 1001;
+        top: 12px;
+        z-index: 1101;
+        font-size: 0.8rem;
+        padding: 0.35rem 0.75rem;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 6px;
+        color: #c8c8e0;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        transition: background 0.2s, border-color 0.2s;
+        box-shadow: none;
+        cursor: pointer;
+      }
+      #eswToggleBtn:hover {
+        background: rgba(255,255,255,0.11);
+        border-color: rgba(255,255,255,0.22);
+      }
+      /* When moved into nav: override fixed positioning */
+      #esw-nav-menu-slot #eswToggleBtn {
+        position: static;
+        left: auto;
+        top: auto;
       }
       #eswToggleBtn.panel-open { left: 720px; }
+      #esw-nav-menu-slot #eswToggleBtn.panel-open {
+        left: auto;
+        background: rgba(130,70,255,0.2);
+        border-color: rgba(130,70,255,0.5);
+        color: #d4aaff;
+      }
 
       /* ── Collapsible sections ───────────────────────────────────────── */
       .esw-collapsible-section {
         margin-top: 1.5rem;
-        border-top: 1px solid #ddd;
+        border-top: 1px solid rgba(255,255,255,0.08);
         padding-top: 1rem;
       }
       .esw-collapsible-section:first-of-type { margin-top: 1rem; }
@@ -102,44 +203,151 @@
         align-items: center;
         padding: 0.5rem 0;
         user-select: none;
+        color: #e8e8f0;
       }
-      .esw-collapsible-header:hover { background-color: #f3f3f3; }
-      .esw-collapsible-content { display: none; padding-top: 1rem; }
+      .esw-collapsible-header h3 { color: #e8e8f0; font-size: 0.875rem; margin: 0; }
+      .esw-collapsible-header span { color: #6868a0; }
+      .esw-collapsible-header:hover { background: rgba(255,255,255,0.04); border-radius: 4px; }
+      .esw-collapsible-content { display: none; padding-top: 1rem; color: #c0c0d8; }
       .esw-collapsible-content.open { display: block; }
 
       /* ── Info table ─────────────────────────────────────────────────── */
       .esw-info-table { width: 100%; border-collapse: collapse; }
-      .esw-info-table td { padding: 0.5rem 0; border: none; }
-      .esw-info-table td:first-child { font-weight: bold; width: 40%; }
+      .esw-info-table td { padding: 0.4rem 0; border: none; font-size: 0.8rem; color: #a0a0b8; }
+      .esw-info-table td:first-child { font-weight: 600; width: 40%; color: #c8c8e0; }
+      .esw-info-table a { color: #a070f0; text-decoration: none; }
+      .esw-info-table a:hover { text-decoration: underline; }
 
       /* ── Form fields ────────────────────────────────────────────────── */
       .esw-form-field { margin-bottom: 1rem; }
       .esw-form-field label {
         display: block;
-        font-weight: bold;
-        margin-bottom: 0.25rem;
-        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+        font-size: 0.8rem;
+        color: #c8c8e0;
       }
-      .esw-form-field input {
+      .esw-form-field input,
+      .esw-form-field textarea {
         width: 100%;
-        padding: 0.5rem;
-        border: 1px solid #ccc;
-        border-radius: 4px;
+        padding: 0.45rem 0.6rem;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 6px;
         box-sizing: border-box;
-        font-size: 0.875rem;
+        font-size: 0.8rem;
+        color: #e8e8f0;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        transition: border-color 0.2s;
       }
+      .esw-form-field input::placeholder,
+      .esw-form-field textarea::placeholder { color: #44445a; }
+      .esw-form-field input:focus,
+      .esw-form-field textarea:focus { border-color: rgba(130,70,255,0.6); outline: none; }
+      .esw-form-field p { color: #6868a0; font-size: 0.75rem; margin: 0.25rem 0 0.5rem; }
+      .esw-form-field code {
+        background: rgba(255,255,255,0.08);
+        padding: 0.1em 0.3em;
+        border-radius: 3px;
+        font-size: 0.75rem;
+        color: #c8a0ff;
+      }
+
+      /* ── Buttons inside panel ───────────────────────────────────────── */
+      #eswSlidePanel button.btn-brand {
+        background: linear-gradient(135deg, #7b2ff7, #5a1bc2);
+        border: none;
+        border-radius: 6px;
+        color: #fff;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 0.45rem 1rem;
+        cursor: pointer;
+        box-shadow: 0 0 12px rgba(123,47,247,0.35);
+      }
+      #eswSlidePanel button.btn-brand:hover { box-shadow: 0 0 20px rgba(123,47,247,0.55); }
+      #eswSlidePanel button.btn-neutral {
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.14);
+        border-radius: 6px;
+        color: #c8c8e0;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        font-size: 0.8rem;
+        padding: 0.45rem 1rem;
+        cursor: pointer;
+      }
+      #eswSlidePanel button.btn-neutral:hover { background: rgba(255,255,255,0.10); }
+
+      /* ── Toggle switches inside panel ───────────────────────────────── */
+      .esw-toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+      }
+      .esw-toggle-row label { font-size: 0.8rem; color: #c8c8e0; }
+      .esw-toggle {
+        position: relative;
+        width: 44px;
+        height: 24px;
+        flex-shrink: 0;
+      }
+      .esw-toggle input { opacity: 0; width: 0; height: 0; }
+      .esw-toggle-track {
+        position: absolute;
+        inset: 0;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.18);
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .esw-toggle-track::after {
+        content: '';
+        position: absolute;
+        top: 3px; left: 3px;
+        width: 16px; height: 16px;
+        border-radius: 50%;
+        background: #888;
+        transition: transform 0.2s, background 0.2s;
+      }
+      .esw-toggle input:checked + .esw-toggle-track {
+        background: rgba(123,47,247,0.5);
+        border-color: rgba(123,47,247,0.7);
+      }
+      .esw-toggle input:checked + .esw-toggle-track::after {
+        transform: translateX(20px);
+        background: #b070ff;
+      }
+      .esw-toggle-label { font-size: 0.72rem; color: #6868a0; margin-left: 0.5rem; }
+
+      /* ── Override banner ────────────────────────────────────────────── */
+      #eswConfigOverrideBanner {
+        background: rgba(176,94,0,0.15);
+        border: 1px solid rgba(240,192,64,0.3);
+        border-radius: 4px;
+        color: #f0c040;
+        font-size: 0.8rem;
+        padding: 0.4rem 0.6rem;
+        margin-bottom: 0.75rem;
+      }
+
+      /* ── Snippet status ─────────────────────────────────────────────── */
+      #eswSnippetStatus { font-size: 0.75rem; margin-top: 0.25rem; min-height: 1.2em; }
 
       /* ── Event log (inside panel) ───────────────────────────────────── */
       #eswEventLog {
-        border: 1px solid #d8dde6;
-        border-radius: 4px;
-        background-color: #f3f3f3;
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 6px;
+        background: rgba(0,0,0,0.35);
         padding: 1rem;
         height: 380px;
         overflow-y: auto;
         font-family: 'Courier New', monospace;
         font-size: 12px;
         margin-top: 0.75rem;
+        color: #a0a0b8;
       }
 
       /* ── Toast ──────────────────────────────────────────────────────── */
@@ -160,7 +368,8 @@
         to   { transform: translateX(320px); opacity: 0; }
       }
     `;
-    document.head.appendChild(style);
+    // Append to body (after SLDS) so our rules win on same-specificity ties
+    (document.body || document.head).appendChild(style);
   }
 
   /* ─── Derive the Salesforce Setup base URL from a SCRT2 endpoint ─────────── */
@@ -256,7 +465,7 @@
       sections.push(`
         <div class="esw-collapsible-section">
           <div class="esw-collapsible-header" onclick="ESWMenu._toggleSection('eswConfigContent','eswConfigIcon')">
-            <h3 class="slds-text-heading_small">Configuration Details</h3>
+            <h3>Configuration Details</h3>
             <span id="eswConfigIcon">&#9660;</span>
           </div>
           <div class="esw-collapsible-content" id="eswConfigContent">
@@ -273,22 +482,21 @@
       sections.push(`
         <div class="esw-collapsible-section">
           <div class="esw-collapsible-header" onclick="ESWMenu._toggleSection('eswDeployContent','eswDeployIcon')">
-            <h3 class="slds-text-heading_small">Deployment Settings</h3>
+            <h3>Deployment Settings</h3>
             <span id="eswDeployIcon">&#9660;</span>
           </div>
           <div class="esw-collapsible-content" id="eswDeployContent">
 
             <div class="esw-form-field">
               <label for="eswDeploySnippet">Paste Code Snippet</label>
-              <p class="slds-text-body_small slds-text-color_weak" style="margin:0.25rem 0 0.5rem;">
+              <p>
                 In Salesforce Setup, open your Embedded Service deployment and copy the code snippet
                 from the <strong>Code Snippets</strong> section. Paste the entire snippet (or just the
-                <code>embeddedservice_bootstrap.init(...)</code> block) below &mdash; the fields will
+                <code>embeddedservice_bootstrap.init(...)</code> block) below — the fields will
                 be populated automatically.
               </p>
               <textarea id="eswDeploySnippet" rows="5"
                         placeholder="Paste the embeddedservice_bootstrap.init(...) block or the full &lt;script&gt; snippet here..."
-                        class="slds-input"
                         style="font-family:monospace;font-size:0.8rem;resize:vertical;width:100%;box-sizing:border-box;"
                         oninput="ESWMenu._parseSnippet()"></textarea>
               <p id="eswSnippetStatus" style="font-size:0.8rem;margin-top:0.25rem;min-height:1.2em;"></p>
@@ -299,35 +507,31 @@
                 <label for="eswDeployOrgId">Org ID</label>
                 <input type="text" id="eswDeployOrgId" maxlength="15"
                        placeholder="15-character Org ID"
-                       value="${d.orgId || ""}"
-                       class="slds-input">
+                       value="${d.orgId || ""}">
               </div>
               <div class="esw-form-field">
                 <label for="eswDeployApiName">Deployment API Name</label>
                 <input type="text" id="eswDeployApiName" maxlength="18"
                        placeholder="Embedded Service Deployment API name"
-                       value="${d.deploymentName || ""}"
-                       class="slds-input">
+                       value="${d.deploymentName || ""}">
               </div>
               <div class="esw-form-field">
                 <label for="eswDeploySiteEndpoint">Site Endpoint</label>
                 <input type="url" id="eswDeploySiteEndpoint"
                        placeholder="https://example.my.site.com/ESWDeploymentName"
-                       value="${d.siteEndpoint || ""}"
-                       class="slds-input">
+                       value="${d.siteEndpoint || ""}">
               </div>
               <div class="esw-form-field">
                 <label for="eswDeployScrt2">SCRT2 Endpoint</label>
                 <input type="url" id="eswDeployScrt2"
                        placeholder="https://example.my.salesforce-scrt.com"
-                       value="${d.scrt2URL || ""}"
-                       class="slds-input">
+                       value="${d.scrt2URL || ""}">
               </div>
             </div>
 
             <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem;">
-              <button class="slds-button slds-button_brand" onclick="ESWMenu._applyDeploymentSettings()">Update</button>
-              <button class="slds-button slds-button_neutral" id="eswClearOverrideBtn"
+              <button class="btn-brand" onclick="ESWMenu._applyDeploymentSettings()">Update</button>
+              <button class="btn-neutral" id="eswClearOverrideBtn"
                       onclick="ESWMenu._clearDeploymentOverride()" style="display:none;">Clear Override</button>
             </div>
           </div>
@@ -339,27 +543,27 @@
       sections.push(`
         <div class="esw-collapsible-section">
           <div class="esw-collapsible-header" onclick="ESWMenu._toggleSection('eswPrechatContent','eswPrechatIcon')">
-            <h3 class="slds-text-heading_small">Pre-Chat Population</h3>
+            <h3>Pre-Chat Population</h3>
             <span id="eswPrechatIcon">&#9660;</span>
           </div>
           <div class="esw-collapsible-content" id="eswPrechatContent">
             <div class="esw-form-field">
-              <label for="eswPcFirstName">First Name:</label>
-              <input type="text" id="eswPcFirstName" value="Peter" class="slds-input">
+              <label for="eswPcFirstName">First Name</label>
+              <input type="text" id="eswPcFirstName" value="Peter">
             </div>
             <div class="esw-form-field">
-              <label for="eswPcLastName">Last Name:</label>
-              <input type="text" id="eswPcLastName" value="Chung" class="slds-input">
+              <label for="eswPcLastName">Last Name</label>
+              <input type="text" id="eswPcLastName" value="Chung">
             </div>
             <div class="esw-form-field">
-              <label for="eswPcEmail">Email:</label>
-              <input type="email" id="eswPcEmail" value="pchung@salesforce.com" class="slds-input">
+              <label for="eswPcEmail">Email</label>
+              <input type="email" id="eswPcEmail" value="pchung@salesforce.com">
             </div>
             <div class="esw-form-field">
-              <label for="eswPcSubject">Subject:</label>
-              <input type="text" id="eswPcSubject" value="product question" class="slds-input">
+              <label for="eswPcSubject">Subject</label>
+              <input type="text" id="eswPcSubject" value="product question">
             </div>
-            <button class="slds-button slds-button_brand" onclick="ESWMenu._savePrechatFields()">Save</button>
+            <button class="btn-brand" onclick="ESWMenu._savePrechatFields()">Save</button>
           </div>
         </div>`);
     }
@@ -369,20 +573,17 @@
       sections.push(`
         <div class="esw-collapsible-section">
           <div class="esw-collapsible-header" onclick="ESWMenu._toggleSection('eswChatBtnContent','eswChatBtnIcon')">
-            <h3 class="slds-text-heading_small">Chat Button Visibility</h3>
+            <h3>Chat Button Visibility</h3>
             <span id="eswChatBtnIcon">&#9660;</span>
           </div>
           <div class="esw-collapsible-content" id="eswChatBtnContent">
-            <div class="slds-form-element">
-              <label class="slds-checkbox_toggle slds-grid">
-                <span class="slds-form-element__label slds-m-bottom_none">Show Chat Button</span>
-                <input type="checkbox" id="eswChatButtonToggle" onchange="ESWMenu._toggleChatButton()" checked />
-                <span id="eswChatButtonToggle-label" class="slds-checkbox_faux_container" aria-live="assertive">
-                  <span class="slds-checkbox_faux"></span>
-                  <span class="slds-checkbox_on">Visible</span>
-                  <span class="slds-checkbox_off">Hidden</span>
-                </span>
+            <div class="esw-toggle-row">
+              <label>Show Chat Button</label>
+              <label class="esw-toggle">
+                <input type="checkbox" id="eswChatButtonToggle" onchange="ESWMenu._toggleChatButton()" checked>
+                <span class="esw-toggle-track"></span>
               </label>
+              <span class="esw-toggle-label" id="eswChatBtnLabel">Visible</span>
             </div>
           </div>
         </div>`);
@@ -393,55 +594,101 @@
       sections.push(`
         <div class="esw-collapsible-section">
           <div class="esw-collapsible-header" onclick="ESWMenu._toggleSection('eswHiddenPcContent','eswHiddenPcIcon')">
-            <h3 class="slds-text-heading_small">Hidden Pre-chat</h3>
+            <h3>Hidden Pre-chat</h3>
             <span id="eswHiddenPcIcon">&#9660;</span>
           </div>
           <div class="esw-collapsible-content" id="eswHiddenPcContent">
-            <div class="slds-form-element">
-              <label class="slds-checkbox_toggle slds-grid">
-                <span class="slds-form-element__label slds-m-bottom_none">Routing Direction</span>
-                <input type="checkbox" id="eswRoutingDirectionToggle" onchange="ESWMenu._toggleRoutingDirection()" />
-                <span id="eswRoutingDirectionToggle-label" class="slds-checkbox_faux_container" aria-live="assertive">
-                  <span class="slds-checkbox_faux"></span>
-                  <span class="slds-checkbox_on">Agent</span>
-                  <span class="slds-checkbox_off">Queue</span>
-                </span>
+            <div class="esw-toggle-row">
+              <label>Routing Direction</label>
+              <label class="esw-toggle">
+                <input type="checkbox" id="eswRoutingDirectionToggle" onchange="ESWMenu._toggleRoutingDirection()">
+                <span class="esw-toggle-track"></span>
               </label>
+              <span class="esw-toggle-label" id="eswRoutingLabel">Queue</span>
             </div>
           </div>
         </div>`);
     }
 
-    /* 6 · Event Log (inside panel) */
+    /* 6 · Inline Mode (v2 Only) */
+    if (cfg.inlineMode && cfg.inlineMode.enabled) {
+      sections.push(`
+        <div class="esw-collapsible-section">
+          <div class="esw-collapsible-header" onclick="ESWMenu._toggleSection('eswInlineModeContent','eswInlineModeIcon')">
+            <h3>Inline Mode (v2 Only)</h3>
+            <span id="eswInlineModeIcon">&#9660;</span>
+          </div>
+          <div class="esw-collapsible-content" id="eswInlineModeContent">
+            <div class="esw-toggle-row">
+              <label>Display Mode</label>
+              <label class="esw-toggle">
+                <input type="checkbox" id="eswDisplayModeToggle">
+                <span class="esw-toggle-track"></span>
+              </label>
+              <span class="esw-toggle-label" id="eswDisplayModeLabel">Inline</span>
+            </div>
+            <div class="esw-toggle-row" style="margin-bottom:1.25rem;">
+              <label>Chat Header</label>
+              <label class="esw-toggle">
+                <input type="checkbox" id="eswHeaderEnabledToggle" checked>
+                <span class="esw-toggle-track"></span>
+              </label>
+              <span class="esw-toggle-label" id="eswHeaderLabel">Enabled</span>
+            </div>
+            <button class="btn-brand" onclick="ESWMenu._applyInlineModeSettings()">Update</button>
+          </div>
+        </div>`);
+    }
+
+    /* 7 · Event Log (inside panel) */
     if (cfg.eventLog && cfg.eventLog.enabled) {
       sections.push(`
         <div class="esw-collapsible-section">
           <div class="esw-collapsible-header" onclick="ESWMenu._toggleSection('eswEventLogPanelContent','eswEventLogPanelIcon')">
-            <h3 class="slds-text-heading_small">Event Log</h3>
+            <h3>Event Log</h3>
             <span id="eswEventLogPanelIcon">&#9660;</span>
           </div>
           <div class="esw-collapsible-content" id="eswEventLogPanelContent">
-            <div class="esw-form-field" style="margin-bottom:0.5rem;">
-              <label class="slds-checkbox" style="font-weight:normal;">
-                <input type="checkbox" id="eswHideReceiptsCheckbox" />
-                <span class="slds-checkbox_faux"></span>
-                <span class="slds-form-element__label">Hide Send and Delivery Receipts</span>
+            <div class="esw-toggle-row" style="margin-bottom:0.75rem;">
+              <label style="font-weight:normal;">Hide Send and Delivery Receipts</label>
+              <label class="esw-toggle">
+                <input type="checkbox" id="eswHideReceiptsCheckbox">
+                <span class="esw-toggle-track"></span>
               </label>
             </div>
             <div id="eswEventLog">
-              <div style="color:#706e6b;">Waiting for events...</div>
+              <div style="color:#5a5a7a;">Waiting for events...</div>
             </div>
           </div>
         </div>`);
     }
 
+    // Build navbar HTML only when explicitly requested via cfg.navbar
+    var navHTML = "";
+    if (cfg.navbar && cfg.navbar !== false) {
+      var navTitle = cfg.navbar.title || cfg.pageTitle || "Demo";
+      var navRightSlot = (cfg.navbar && cfg.navbar.rightSlotHTML) || "";
+      navHTML = `
+      <nav id="esw-nav">
+        <div class="esw-nav-logo">
+          <svg viewBox="0 0 52 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Salesforce">
+            <path d="M21.6 4.2a10.4 10.4 0 0 1 7.4 3.1 14.3 14.3 0 0 1 6.9-1.8c7.9 0 14.3 6.4 14.3 14.4S43.8 34.3 35.9 34.3c-1 0-2-.1-2.9-.3a8.6 8.6 0 0 1-7.7 4.7 8.5 8.5 0 0 1-6.3-2.8 11.6 11.6 0 0 1-4.5.9C7.8 36.8 2 31 2 23.7c0-4.5 2.2-8.5 5.6-10.9a10.4 10.4 0 0 1 14-8.6z" fill="#00A1E0"/>
+          </svg>
+        </div>
+        <span class="esw-nav-title">${navTitle}</span>
+        <div class="esw-nav-spacer"></div>
+        <div id="esw-nav-right-slot">${navRightSlot}</div>
+        <div id="esw-nav-menu-slot"></div>
+      </nav>`;
+    }
+
     return `
+      ${navHTML}
       <div id="eswSlidePanel">
-        <h2 class="slds-text-heading_medium">${cfg.pageTitle || "Page Settings"}</h2>
+        <h2>${cfg.pageTitle || "Page Settings"}</h2>
         ${sections.join("")}
       </div>
-      <button id="eswToggleBtn" class="toggle-btn slds-button slds-button_brand"
-              onclick="ESWMenu.togglePanel()">&#9776; Menu</button>
+      <button id="eswToggleBtn" onclick="ESWMenu.togglePanel()">&#9776; Menu</button>
       <div id="eswToastContainer"></div>`;
   }
 
@@ -474,6 +721,18 @@
       // Wire pre-chat defaults if the page exposes prechatValues
       if (_cfg.prechat && _cfg.prechat.enabled) {
         ESWMenu._syncPrechatFromPage();
+      }
+
+      // Restore saved inline mode settings into the panel toggles
+      if (_cfg.inlineMode && _cfg.inlineMode.enabled) {
+        ESWMenu._restoreInlineModeSettings();
+      }
+
+      // If navbar was rendered, move the toggle button into its menu slot
+      var menuSlot = document.getElementById("esw-nav-menu-slot");
+      var toggleBtn = document.getElementById("eswToggleBtn");
+      if (menuSlot && toggleBtn) {
+        menuSlot.appendChild(toggleBtn);
       }
     },
 
@@ -549,7 +808,7 @@
       const entryId = "eswEntry_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
 
       const entry = document.createElement("div");
-      entry.style.cssText = "margin-bottom:0.5rem;padding-bottom:0.5rem;border-bottom:1px solid #d8dde6;";
+      entry.style.cssText = "margin-bottom:0.5rem;padding-bottom:0.5rem;border-bottom:1px solid rgba(255,255,255,0.08);";
 
       // Build header row with DOM methods to avoid encoding issues with triangle chars
       const header = document.createElement("div");
@@ -565,7 +824,7 @@
       tsSpan.textContent = "[" + timestamp + "]";
 
       const nameSpan = document.createElement("span");
-      nameSpan.style.color = "#080707";
+      nameSpan.style.color = "#c8c8e0";
       nameSpan.textContent = " " + eventName;
 
       header.appendChild(toggleIcon);
@@ -925,39 +1184,42 @@
 
     _toggleChatButton: function () {
       const isChecked = document.getElementById("eswChatButtonToggle").checked;
+      const lbl = document.getElementById("eswChatBtnLabel");
+      if (lbl) lbl.textContent = isChecked ? "Visible" : "Hidden";
       if (typeof embeddedservice_bootstrap !== "undefined" && embeddedservice_bootstrap.utilAPI) {
         const method = isChecked ? "showChatButton" : "hideChatButton";
         try {
           const result = embeddedservice_bootstrap.utilAPI[method]();
-          // The API may be synchronous or return a Promise depending on the version
           if (result && typeof result.then === "function") {
             result
-              .then(function () {
-                ESWMenu.showToast(isChecked ? "Chat button visible" : "Chat button hidden", "success");
-              })
+              .then(function () { ESWMenu.showToast(isChecked ? "Chat button visible" : "Chat button hidden", "success"); })
               .catch(function () {
                 ESWMenu.showToast("Unable to " + (isChecked ? "show" : "hide") + " chat button", "error");
                 document.getElementById("eswChatButtonToggle").checked = !isChecked;
+                if (lbl) lbl.textContent = !isChecked ? "Visible" : "Hidden";
               });
           } else {
-            // Synchronous — just show the toast directly
             ESWMenu.showToast(isChecked ? "Chat button visible" : "Chat button hidden", "success");
           }
         } catch (e) {
           ESWMenu.showToast("Unable to " + (isChecked ? "show" : "hide") + " chat button", "error");
           document.getElementById("eswChatButtonToggle").checked = !isChecked;
+          if (lbl) lbl.textContent = !isChecked ? "Visible" : "Hidden";
         }
       } else {
         ESWMenu.showToast("Chat is not ready yet", "info");
         document.getElementById("eswChatButtonToggle").checked = !isChecked;
+        if (lbl) lbl.textContent = !isChecked ? "Visible" : "Hidden";
       }
     },
 
     /* ── Hidden Pre-chat ────────────────────────────────────────────────── */
 
     _toggleRoutingDirection: function () {
-      const isChecked   = document.getElementById("eswRoutingDirectionToggle").checked;
+      const isChecked    = document.getElementById("eswRoutingDirectionToggle").checked;
       const routingValue = isChecked ? "Agent" : "Queue";
+      const lbl = document.getElementById("eswRoutingLabel");
+      if (lbl) lbl.textContent = routingValue;
       if (typeof embeddedservice_bootstrap !== "undefined" && embeddedservice_bootstrap.prechatAPI) {
         try {
           embeddedservice_bootstrap.prechatAPI.setHiddenPrechatFields({ routingDirection: routingValue });
@@ -968,6 +1230,84 @@
       } else {
         ESWMenu.showToast("Routing Direction: " + routingValue, "info");
       }
+    },
+
+    /* ── Inline Mode ────────────────────────────────────────────────────── */
+
+    INLINE_MODE_KEY: "eswInlineModeSettings",
+
+    /**
+     * Restore saved inline mode settings into the panel toggle controls.
+     * Called from init() whenever inlineMode is enabled.
+     */
+    _restoreInlineModeSettings: function () {
+      try {
+        const saved = localStorage.getItem(ESWMenu.INLINE_MODE_KEY);
+        if (saved) {
+          const s = JSON.parse(saved);
+          // displayMode: 'shelf' (checked=true) | 'inline' (checked=false)
+          const displayToggle = document.getElementById("eswDisplayModeToggle");
+          const displayLabel  = document.getElementById("eswDisplayModeLabel");
+          if (displayToggle) {
+            displayToggle.checked = (s.displayMode === "shelf");
+            if (displayLabel) displayLabel.textContent = (s.displayMode === "shelf") ? "Shelf" : "Inline";
+          }
+          const headerToggle = document.getElementById("eswHeaderEnabledToggle");
+          const headerLabel  = document.getElementById("eswHeaderLabel");
+          if (headerToggle && s.headerEnabled !== undefined) {
+            headerToggle.checked = !!s.headerEnabled;
+            if (headerLabel) headerLabel.textContent = s.headerEnabled ? "Enabled" : "Disabled";
+          }
+        }
+      } catch (e) { /* localStorage not available */ }
+    },
+
+    /**
+     * Save settings and reload. The page reads these values via
+     * ESWMenu.getInlineModeConfig() during its own init.
+     */
+    _applyInlineModeSettings: function () {
+      const displayToggle = document.getElementById("eswDisplayModeToggle");
+      const headerToggle  = document.getElementById("eswHeaderEnabledToggle");
+
+      const settings = {
+        displayMode:   (displayToggle && displayToggle.checked) ? "shelf" : "inline",
+        headerEnabled: (headerToggle  && headerToggle.checked)
+      };
+
+      try {
+        localStorage.setItem(ESWMenu.INLINE_MODE_KEY, JSON.stringify(settings));
+      } catch (e) { /* ignore */ }
+
+      ESWMenu.showToast("Reloading with updated inline mode settings…", "info");
+      setTimeout(function () { location.reload(); }, 800);
+    },
+
+    /**
+     * Called by the page's initEmbeddedMessaging() to get the persisted
+     * inline mode settings. Falls back to the provided defaults if nothing
+     * is saved.
+     *
+     * Usage:
+     *   const inlineConfig = ESWMenu.getInlineModeConfig({ displayMode: 'shelf', headerEnabled: true });
+     *   embeddedservice_bootstrap.settings.displayMode   = inlineConfig.displayMode;
+     *   embeddedservice_bootstrap.settings.headerEnabled = inlineConfig.headerEnabled;
+     */
+    getInlineModeConfig: function (defaults) {
+      defaults = defaults || { displayMode: "shelf", headerEnabled: true };
+      try {
+        const saved = localStorage.getItem(ESWMenu.INLINE_MODE_KEY);
+        if (saved) {
+          const s = JSON.parse(saved);
+          if (s.displayMode) {
+            return {
+              displayMode:   s.displayMode,
+              headerEnabled: (s.headerEnabled !== undefined) ? !!s.headerEnabled : defaults.headerEnabled
+            };
+          }
+        }
+      } catch (e) { /* ignore */ }
+      return defaults;
     }
 
   }; // end ESWMenu
