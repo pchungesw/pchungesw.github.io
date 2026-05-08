@@ -86,40 +86,14 @@
 	#inline-chat-container {
 		flex: 1;           /* takes the remaining 70% */
 		min-width: 0;
-		border: 1px solid rgba(130,70,255,0.25);
+		border: none;
 		border-radius: 12px;
 		overflow: hidden;
 		position: relative;
-		box-shadow: 0 0 40px rgba(100,40,200,0.15);
-		background: rgba(255,255,255,0.015);
+		background: transparent;
 	}
 	/* Placeholder — centred inside the panel when chat isn't active */
-	#inline-chat-placeholder {
-		position: absolute;
-		inset: 0;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		gap: 0.75rem;
-		opacity: 0.35;
-		pointer-events: none;
-		user-select: none;
-	}
-	#inline-chat-placeholder svg {
-		width: 48px;
-		height: 48px;
-		color: #a070f0;
-	}
-	#inline-chat-placeholder p {
-		font-size: 0.85rem;
-		color: #a0a0b8;
-		margin: 0;
-	}
-	/* Hide placeholder once the chat component is mounted */
-	#inline-chat-container.chat-active #inline-chat-placeholder {
-		display: none;
-	}
+	#inline-chat-placeholder { display: none; }
 
 	/* ── Hero text ───────────────────────────────────────────────────────── */
 	.labs-heading {
