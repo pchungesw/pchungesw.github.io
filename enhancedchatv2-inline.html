@@ -259,9 +259,20 @@
 	// ── Display mode state ───────────────────────────────────────────────
 	// 'shelf'  = slide-in shelf (inline mode, target = #shelf-chat-container)
 	// 'inline' = embedded in page content (inline mode, target = #inline-chat-container)
-	// Resolved from localStorage via ESWMenu.getInlineModeConfig() after ESWMenu loads.
-	// Initialised to 'shelf' as fallback until ESWMenu is available.
-	let currentDisplayMode = 'shelf';
+	//
+	// Read from localStorage immediately so event handlers always have the
+	// correct value — even if an event fires before initEmbeddedMessaging()
+	// has run (e.g. synchronous dispatch inside the bootstrap lib).
+	let currentDisplayMode = (function () {
+		try {
+			var saved = localStorage.getItem('eswInlineModeSettings');
+			if (saved) {
+				var s = JSON.parse(saved);
+				if (s.displayMode) return s.displayMode;
+			}
+		} catch (e) { /* ignore */ }
+		return 'shelf';
+	}());
 
 	// Apply the current display mode to the DOM immediately (before bootstrap loads).
 	// - In inline mode: hide the action button (chat auto-launches).
@@ -538,18 +549,9 @@
      resumed automatically without requiring a button click.              -->
 <script>
 	(function () {
-		// Peek at the persisted display mode without going through ESWMenu
-		var savedMode = 'shelf';
-		try {
-			var saved = localStorage.getItem('eswInlineModeSettings');
-			if (saved) {
-				var s = JSON.parse(saved);
-				if (s.displayMode) savedMode = s.displayMode;
-			}
-		} catch (e) { /* ignore */ }
-
-		// Apply DOM state immediately (hides button in inline mode, etc.)
-		applyDisplayModeToDOM(savedMode);
+		// currentDisplayMode was already read from localStorage at the top of
+		// the script, so we can use it directly here.
+		applyDisplayModeToDOM(currentDisplayMode);
 
 		var script = document.createElement('script');
 		script.type = 'text/javascript';
