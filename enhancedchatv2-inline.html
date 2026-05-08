@@ -264,65 +264,62 @@
 	let currentDisplayMode = 'shelf';
 
 	// Apply the current display mode to the DOM immediately (before bootstrap loads).
-	// - In inline mode:  show the right-column chat container; hide the action button.
-	// - In shelf mode:   right column shows an empty placeholder; button stays visible.
+	// - In inline mode: hide the action button (chat auto-launches).
+	// - In shelf mode:  show button in disabled "Loading…" state until onReady fires.
 	function applyDisplayModeToDOM(mode) {
 		const actionBtn = document.getElementById('chatActionBtn');
 		if (mode === 'inline') {
 			if (actionBtn) actionBtn.style.display = 'none';
 		} else {
-			if (actionBtn) actionBtn.style.display = '';
+			if (actionBtn) {
+				actionBtn.style.display = '';
+				actionBtn.textContent   = 'Loading…';
+				actionBtn.disabled      = true;
+			}
 		}
 	}
 
 
 
 	// ── Shelf chat button state machine ──────────────────────────────────
-	// 'pre-init'  → app not yet bootstrapped; button says "Start Chat"
-	// 'open'      → shelf is visible;          button says "Minimize Chat"
-	// 'minimized' → app running, shelf hidden; button says "Open Chat"
-	let shelfState = 'pre-init';
+	// 'loading'   → bootstrap fired, awaiting onReady; button says "Loading…"
+	// 'ready'     → app ready, shelf closed;           button says "Start Chat"
+	// 'open'      → shelf is visible;                  button says "Minimize Chat"
+	// 'minimized' → app running, shelf hidden;         button says "Open Chat"
+	let shelfState = 'loading';
 
 	function setShelfState(state) {
 		shelfState = state;
-		const btn = document.getElementById('chatActionBtn');
-		if (state === 'pre-init') {
-			btn.textContent = 'Start Chat';
-			document.getElementById('chat-shelf').classList.remove('shelf-open');
+		const btn   = document.getElementById('chatActionBtn');
+		const shelf = document.getElementById('chat-shelf');
+		if (state === 'loading') {
+			if (btn) { btn.textContent = 'Loading…'; btn.disabled = true; }
+		} else if (state === 'ready') {
+			if (btn) { btn.textContent = 'Start Chat'; btn.disabled = false; }
+			if (shelf) shelf.classList.remove('shelf-open');
 		} else if (state === 'open') {
-			btn.textContent = 'Minimize Chat';
-			document.getElementById('chat-shelf').classList.add('shelf-open');
+			if (btn) { btn.textContent = 'Minimize Chat'; btn.disabled = false; }
+			if (shelf) shelf.classList.add('shelf-open');
 		} else if (state === 'minimized') {
-			btn.textContent = 'Open Chat';
-			document.getElementById('chat-shelf').classList.remove('shelf-open');
+			if (btn) { btn.textContent = 'Open Chat'; btn.disabled = false; }
+			if (shelf) shelf.classList.remove('shelf-open');
 		}
 	}
 
 	// ── Unified button handler ───────────────────────────────────────────
 	function handleChatAction() {
 		if (currentDisplayMode === 'inline') {
-			// Inline mode: button always calls launchChat()
 			startChat();
 			return;
 		}
-		// Shelf mode state machine
-		if (shelfState === 'pre-init') {
-			// First click: bootstrap the app — onEmbeddedMessagingReady will
-			// call setShelfState('open') once the component is ready
-			initEmbeddedMessaging();
+		// Shelf mode
+		if (shelfState === 'loading') {
+			showToast('Chat is still loading, please wait…', 'info');
+		} else if (shelfState === 'ready' || shelfState === 'minimized') {
+			setShelfState('open');
 		} else if (shelfState === 'open') {
 			setShelfState('minimized');
-		} else if (shelfState === 'minimized') {
-			setShelfState('open');
 		}
-	}
-
-	// ── Shelf open/close helpers (used internally) ───────────────────────
-	function openShelf() {
-		setShelfState('open');
-	}
-	function closeShelf() {
-		if (shelfState !== 'pre-init') setShelfState('minimized');
 	}
 
 	// ── Utility wrappers ─────────────────────────────────────────────────
@@ -408,20 +405,30 @@
 		document.getElementById('inline-chat-container').classList.add('chat-active');
 
 		if (currentDisplayMode === 'inline') {
-			// Inline mode: button is already hidden; auto-launch the chat
+			// Inline mode: auto-launch (shows pre-chat form or resumes existing session)
 			try {
 				embeddedservice_bootstrap.utilAPI.launchChat();
 			} catch (e) { console.error('Error auto-launching chat:', e); }
-		} else if (shelfState === 'pre-init') {
-			// Shelf mode: "Start Chat" was already clicked to trigger init,
-			// so transition to 'open' now that the app is ready.
-			setShelfState('open');
+		} else {
+			// Shelf mode: app is ready; surface the Start Chat button
+			setShelfState('ready');
 		}
 	});
 
 	// Conversation Status
 	window.addEventListener('onEmbeddedMessagingConversationStarted', function (e) { ESWMenu.logEvent('onEmbeddedMessagingConversationStarted', e.detail); });
-	window.addEventListener('onEmbeddedMessagingConversationOpened',  function (e) { ESWMenu.logEvent('onEmbeddedMessagingConversationOpened',  e.detail); });
+	window.addEventListener('onEmbeddedMessagingConversationOpened',  function (e) {
+		ESWMenu.logEvent('onEmbeddedMessagingConversationOpened', e.detail);
+		// An existing conversation was found on page load — surface it immediately
+		if (currentDisplayMode === 'inline') {
+			try {
+				embeddedservice_bootstrap.utilAPI.launchChat();
+			} catch (err) { console.error('Error resuming chat:', err); }
+		} else {
+			// Shelf mode: open the shelf so the user sees the active conversation
+			setShelfState('open');
+		}
+	});
 	window.addEventListener('onEmbeddedMessagingConversationClosed',  function (e) { ESWMenu.logEvent('onEmbeddedMessagingConversationClosed',  e.detail); });
 	window.addEventListener('onEmbeddedMessagingSessionStatusUpdate', function (e) { ESWMenu.logEvent('onEmbeddedMessagingSessionStatusUpdate', e.detail); });
 
@@ -526,15 +533,12 @@
 
 </script>
 
-<!-- ── Dynamically load bootstrap.min.js ────────────────────────────────
-     The script always loads on page load so it is ready when needed.
-     - Inline mode: initEmbeddedMessaging() fires immediately on load.
-     - Shelf mode:  initEmbeddedMessaging() is called lazily on the first
-                    "Start Chat" button click; the script is already cached. -->
+<!-- ── Dynamically load bootstrap.min.js and always init on page load ──
+     Both modes initialise immediately so an existing conversation can be
+     resumed automatically without requiring a button click.              -->
 <script>
 	(function () {
 		// Peek at the persisted display mode without going through ESWMenu
-		// (ESWMenu may not have called getInlineModeConfig yet at this point).
 		var savedMode = 'shelf';
 		try {
 			var saved = localStorage.getItem('eswInlineModeSettings');
@@ -552,13 +556,11 @@
 		script.src  = ESWMenu.getBootstrapURL(
 			'https://agentforceweb.demo.my.site.com/ESWMIAWDirecttoService1754418132529'
 		);
-		script.onload = function () {
-			if (savedMode === 'inline') {
-				// Inline mode: auto-initialise so the component renders immediately
-				initEmbeddedMessaging();
-			}
-			// Shelf mode: wait for the user to click "Start Chat"
-		};
+		// Always init on load — for both modes.
+		// onEmbeddedMessagingReady will surface the UI once ready,
+		// and onEmbeddedMessagingConversationOpened will auto-show
+		// any existing active conversation.
+		script.onload = initEmbeddedMessaging;
 		document.head.appendChild(script);
 	}());
 </script>
