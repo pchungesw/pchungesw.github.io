@@ -2,48 +2,186 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, user-scalable=0">
-<title>Neat Stuff MIAW Demo - Direct to Agent</title>
+<title>Enhanced Chat v1 - Overlay Mode Demo</title>
 <link rel="icon" type="image/png" href="image/favicon.png">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@salesforce-ux/design-system@2.22.2/assets/styles/salesforce-lightning-design-system.min.css">
 <link rel="stylesheet" href="demo-styles.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-	@keyframes slideIn {
-		from { transform: translateX(400px); opacity: 0; }
-		to   { transform: translateX(0);     opacity: 1; }
+	/* ── Agentforce Labs–inspired theme ──────────────────────────────────── */
+
+	*, *::before, *::after { box-sizing: border-box; }
+
+	body {
+		margin: 0;
+		min-height: 100vh;
+		font-family: 'Inter', 'Segoe UI', sans-serif;
+		background-color: #0d0d12;
+		color: #e8e8f0;
+		/* Grid overlay */
+		background-image:
+			linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+		background-size: 40px 40px;
+		overflow-x: hidden;
 	}
-	@keyframes slideOut {
-		from { transform: translateX(0);     opacity: 1; }
-		to   { transform: translateX(400px); opacity: 0; }
+
+	/* ── Purple radial glow (upper-left) ─────────────────────────────────── */
+	body::before {
+		content: '';
+		position: fixed;
+		top: -20%;
+		left: -10%;
+		width: 70vw;
+		height: 70vh;
+		background: radial-gradient(ellipse at center, rgba(120,40,200,0.35) 0%, rgba(80,20,160,0.15) 45%, transparent 70%);
+		pointer-events: none;
+		z-index: 0;
 	}
+
+	/* ── Glowing orb (lower-right, decorative) ───────────────────────────── */
+	body::after {
+		content: '';
+		position: fixed;
+		bottom: 5%;
+		right: 5%;
+		width: 320px;
+		height: 320px;
+		background: radial-gradient(circle at center, rgba(200,130,255,0.55) 0%, rgba(170,80,255,0.25) 40%, transparent 70%);
+		border-radius: 50%;
+		filter: blur(32px);
+		pointer-events: none;
+		z-index: 0;
+	}
+
+	/* ── Main page layout ────────────────────────────────────────────────── */
+	#page-content {
+		position: relative;
+		z-index: 1;
+		padding: 52px 4rem 2rem;
+		height: 100vh;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		overflow: hidden;
+		box-sizing: border-box;
+	}
+
+	#content-left {
+		max-width: 520px;
+	}
+
+	/* ── Hero text ───────────────────────────────────────────────────────── */
+	.labs-heading {
+		font-size: 2.75rem;
+		font-weight: 700;
+		color: #ffffff;
+		margin: 0 0 0.5rem;
+		letter-spacing: -0.02em;
+		line-height: 1.15;
+	}
+	.labs-subheading {
+		font-size: 0.95rem;
+		color: #a0a0b8;
+		margin: 0 0 1rem;
+		font-weight: 400;
+	}
+	.labs-subheading a {
+		color: #a070f0;
+		text-decoration: none;
+		font-weight: 500;
+	}
+	.labs-subheading a:hover { text-decoration: underline; }
+
+	/* ── Card row ────────────────────────────────────────────────────────── */
+	.labs-cards {
+		display: flex;
+		gap: 1rem;
+		flex-wrap: wrap;
+		align-items: flex-start;
+		margin-bottom: 2.5rem;
+		margin-top: 1.5rem;
+	}
+	.labs-card {
+		background: rgba(255,255,255,0.05);
+		border: 1px solid rgba(130,70,255,0.35);
+		border-radius: 12px;
+		padding: 1rem 1.25rem;
+		width: 200px;
+		cursor: pointer;
+		transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+		box-shadow: 0 0 0 0 rgba(130,70,255,0);
+	}
+	.labs-card:hover {
+		background: rgba(130,70,255,0.12);
+		border-color: rgba(160,100,255,0.7);
+		box-shadow: 0 0 18px rgba(130,70,255,0.25);
+	}
+	.labs-card.active {
+		background: rgba(130,70,255,0.15);
+		border-color: rgba(160,100,255,0.9);
+		box-shadow: 0 0 24px rgba(130,70,255,0.35);
+	}
+	.labs-card-icon { font-size: 1.25rem; margin-bottom: 0.5rem; }
+	.labs-card-title { font-size: 0.875rem; font-weight: 600; color: #fff; margin: 0 0 0.25rem; }
+	.labs-card-desc  { font-size: 0.75rem; color: #8888a8; margin: 0; line-height: 1.5; }
+
+	/* ── Start Chat button ───────────────────────────────────────────────── */
+	#startChatBtn {
+		background: linear-gradient(135deg, #7b2ff7, #5a1bc2);
+		border: none;
+		border-radius: 8px;
+		color: #fff;
+		font-family: inherit;
+		font-size: 0.875rem;
+		font-weight: 600;
+		padding: 0.6rem 1.5rem;
+		cursor: pointer;
+		box-shadow: 0 0 16px rgba(123,47,247,0.4);
+		transition: box-shadow 0.2s, transform 0.15s;
+		letter-spacing: 0.01em;
+		display: none;
+	}
+	#startChatBtn:hover {
+		box-shadow: 0 0 28px rgba(123,47,247,0.65);
+		transform: translateY(-1px);
+	}
+	#startChatBtn:active { transform: translateY(0); }
 </style>
 </head>
-<body class="slds-scope">
+<body>
 
 <!-- ═══════════════════════════════════════════════════════════════════════
      The Page Settings slide-panel (☰ Menu) is injected entirely by
      esw-page-menu.js via ESWMenu.init() near the bottom of this file.
-     To change the panel UI, edit ONLY esw-page-menu.js — changes apply
-     to every page that includes it.
 ════════════════════════════════════════════════════════════════════════ -->
 
-<!-- ── Page body ──────────────────────────────────────────────────────── -->
+<!-- ── Main page content ──────────────────────────────────────────────── -->
+<div id="page-content">
+	<div id="content-left">
+		<h1 class="labs-heading">Enhanced Chat v1</h1>
+		<p class="labs-subheading">Overlay mode demo powered by <a href="https://www.salesforce.com/agentforce/" target="_blank">Agentforce.</a></p>
+		<p class="labs-subheading"><a href="enhancedchatv2-inline.html">Click here</a> to view this conversation in inline mode.</p>
 
-<div class="page-header">
-	<h1 class="slds-text-heading_large">Enhanced Chat v1</h1>
-</div>
+		<!-- Feature cards -->
+		<div class="labs-cards">
+			<div class="labs-card active">
+				<div class="labs-card-icon">💬</div>
+				<p class="labs-card-title">Overlay Chat</p>
+				<p class="labs-card-desc">Chat launches as a floating overlay on top of the page content.</p>
+			</div>
+			<div class="labs-card">
+				<div class="labs-card-icon">🔍</div>
+				<p class="labs-card-title">Session Context</p>
+				<p class="labs-card-desc">Pass search queries as context to the agent before the conversation starts.</p>
+			</div>
+		</div>
 
-<div style="max-width: 600px; margin: 2rem auto; text-align: center;">
-	<div style="display: flex; gap: 0.5rem; justify-content: center;">
-		<input type="text" id="searchInput" placeholder="Search for products..."
-		       class="slds-input" style="flex: 1; max-width: 400px;"
-		       onkeypress="if(event.key === 'Enter') handleSearch()">
-		<button class="slds-button slds-button_neutral" onclick="handleSearch()">Search</button>
+		<div>
+			<button id="startChatBtn" onclick="startChat()">Start Chat</button>
+		</div>
 	</div>
-</div>
-
-<div style="text-align: center; margin-top: 2rem;">
-	<button id="startChatBtn" class="slds-button slds-button_brand"
-	        onclick="startChat()" style="display: none;">Start Chat</button>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════════════
@@ -51,8 +189,6 @@
 ════════════════════════════════════════════════════════════════════════ -->
 <script>
 	// ── Default deployment configuration for this page ──────────────────
-	// These are the values that will be used unless the user overrides
-	// them via the Deployment Settings section in the menu.
 	const PAGE_DEPLOY_DEFAULTS = {
 		orgId:          '00DWs00000CvEVZ',
 		deploymentName: 'MIAW_Direct_to_Service_Rep',
@@ -98,8 +234,6 @@
 	}
 
 	// ── Embedded Messaging init ──────────────────────────────────────────
-	// ESWMenu.getDeploymentConfig() returns the user's saved override (if
-	// any) or falls back to PAGE_DEPLOY_DEFAULTS.
 	function initEmbeddedMessaging() {
 		try {
 			const deploy = ESWMenu.getDeploymentConfig(PAGE_DEPLOY_DEFAULTS);
@@ -180,14 +314,17 @@
 	window.addEventListener('onEmbeddedMessagingTranscriptRequestFailed',        function (e) { ESWMenu.logEvent('onEmbeddedMessagingTranscriptRequestFailed',        e.detail); });
 </script>
 
-<!-- ── Shared menu component (must load before bootstrap so that
-     ESWMenu.init() has run before initEmbeddedMessaging() is called) ── -->
+<!-- ── Shared menu component ─────────────────────────────────────────── -->
 <script src="esw-page-menu.js"></script>
 
 <script>
-	// ── Initialize the Page Settings panel for this specific page ────────
 	ESWMenu.init({
 		pageTitle: 'Page Settings',
+		navbar: {
+			title: 'Enhanced Chat v1 – Overlay Mode',
+			rightSlotHTML: '<input type="text" id="searchInput" placeholder="Search for products…" onkeypress="if(event.key===\'Enter\')handleSearch()">'
+			              + '<button onclick="handleSearch()">Search</button>'
+		},
 		configDetails: {
 			rows: [
 				{ label: 'Org Name', value: 'Agentforceweb' },
@@ -233,8 +370,7 @@
 	});
 </script>
 
-<!-- ── Dynamically load bootstrap.min.js so the URL can be overridden
-     by Deployment Settings without hard-coding it in the HTML ─────── -->
+<!-- ── Dynamically load bootstrap.min.js ─────────────────────────────── -->
 <script>
 	(function () {
 		var s = document.createElement('script');
