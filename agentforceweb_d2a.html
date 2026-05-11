@@ -252,7 +252,20 @@
 	window.addEventListener('onEmbeddedMessagingConversationStarted', function (e) { ESWMenu.logEvent('onEmbeddedMessagingConversationStarted', e.detail); });
 	window.addEventListener('onEmbeddedMessagingConversationOpened',  function (e) { ESWMenu.logEvent('onEmbeddedMessagingConversationOpened',  e.detail); });
 	window.addEventListener('onEmbeddedMessagingConversationClosed',  function (e) { ESWMenu.logEvent('onEmbeddedMessagingConversationClosed',  e.detail); });
-	window.addEventListener('onEmbeddedMessagingSessionStatusUpdate', function (e) { ESWMenu.logEvent('onEmbeddedMessagingSessionStatusUpdate', e.detail); });
+	window.addEventListener('onEmbeddedMessagingSessionStatusUpdate', function (e) {
+		ESWMenu.logEvent('onEmbeddedMessagingSessionStatusUpdate', e.detail);
+		// When the session ends, re-apply hidden pre-chat fields so they are
+		// ready for the next conversation the user starts.
+		try {
+			var payload = e.detail && e.detail.conversationEntry && e.detail.conversationEntry.entryPayload;
+			if (payload) {
+				var parsed = JSON.parse(payload);
+				if (parsed.sessionStatus === 'Ended') {
+					ESWMenu.applyHiddenPrechatSettings();
+				}
+			}
+		} catch (err) { console.error('Error handling session status update:', err); }
+	});
 
 	// Business Hours
 	window.addEventListener('onEmbeddedMessagingWithinBusinessHours',  function (e) { ESWMenu.logEvent('onEmbeddedMessagingWithinBusinessHours',  e.detail); });
