@@ -408,8 +408,8 @@
 			} catch (e) { console.error('Error with prechatAPI:', e); }
 
 			try {
-				embeddedservice_bootstrap.prechatAPI.setHiddenPrechatFields({ routingDirection: 'Queue' });
-			} catch (e) { console.error('Error setting default routing direction:', e); }
+				ESWMenu.applyHiddenPrechatSettings();
+			} catch (e) { console.error('Error setting hidden pre-chat fields:', e); }
 		}
 
 		// Hide placeholder in the right column once the component is mounted

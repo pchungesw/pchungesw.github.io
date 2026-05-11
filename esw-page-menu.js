@@ -723,6 +723,11 @@
         ESWMenu._syncPrechatFromPage();
       }
 
+      // Restore saved hidden pre-chat settings (routing direction) into the panel toggles
+      if (_cfg.hiddenPrechat && _cfg.hiddenPrechat.enabled) {
+        ESWMenu._restoreHiddenPrechatSettings();
+      }
+
       // Restore saved inline mode settings into the panel toggles
       if (_cfg.inlineMode && _cfg.inlineMode.enabled) {
         ESWMenu._restoreInlineModeSettings();
@@ -1215,11 +1220,19 @@
 
     /* ── Hidden Pre-chat ────────────────────────────────────────────────── */
 
+    HIDDEN_PRECHAT_KEY: "eswHiddenPrechatSettings",
+
     _toggleRoutingDirection: function () {
       const isChecked    = document.getElementById("eswRoutingDirectionToggle").checked;
       const routingValue = isChecked ? "Agent" : "Queue";
       const lbl = document.getElementById("eswRoutingLabel");
       if (lbl) lbl.textContent = routingValue;
+
+      // Persist so it survives page refresh
+      try {
+        localStorage.setItem(ESWMenu.HIDDEN_PRECHAT_KEY, JSON.stringify({ routingDirection: routingValue }));
+      } catch (e) { /* ignore */ }
+
       if (typeof embeddedservice_bootstrap !== "undefined" && embeddedservice_bootstrap.prechatAPI) {
         try {
           embeddedservice_bootstrap.prechatAPI.setHiddenPrechatFields({ routingDirection: routingValue });
@@ -1230,6 +1243,47 @@
       } else {
         ESWMenu.showToast("Routing Direction: " + routingValue, "info");
       }
+    },
+
+    /**
+     * Restore the saved routing direction toggle state into the panel UI.
+     * Called from init(). Does NOT call setHiddenPrechatFields — that must
+     * happen inside onEmbeddedMessagingReady via applyHiddenPrechatSettings().
+     */
+    _restoreHiddenPrechatSettings: function () {
+      try {
+        const saved = localStorage.getItem(ESWMenu.HIDDEN_PRECHAT_KEY);
+        if (saved) {
+          const s = JSON.parse(saved);
+          const toggle = document.getElementById("eswRoutingDirectionToggle");
+          const lbl    = document.getElementById("eswRoutingLabel");
+          if (toggle && s.routingDirection) {
+            toggle.checked = (s.routingDirection === "Agent");
+            if (lbl) lbl.textContent = s.routingDirection;
+          }
+        }
+      } catch (e) { /* ignore */ }
+    },
+
+    /**
+     * Apply the persisted hidden pre-chat settings to the bootstrap API.
+     * Call this inside your page's onEmbeddedMessagingReady handler so the
+     * saved value is re-applied every time the widget initialises.
+     *
+     * Usage:
+     *   window.addEventListener('onEmbeddedMessagingReady', function () {
+     *     ESWMenu.applyHiddenPrechatSettings();
+     *     // ... rest of ready handler
+     *   });
+     */
+    applyHiddenPrechatSettings: function () {
+      try {
+        const saved = localStorage.getItem(ESWMenu.HIDDEN_PRECHAT_KEY);
+        const routingValue = saved ? (JSON.parse(saved).routingDirection || "Queue") : "Queue";
+        if (typeof embeddedservice_bootstrap !== "undefined" && embeddedservice_bootstrap.prechatAPI) {
+          embeddedservice_bootstrap.prechatAPI.setHiddenPrechatFields({ routingDirection: routingValue });
+        }
+      } catch (e) { /* ignore */ }
     },
 
     /* ── Inline Mode ────────────────────────────────────────────────────── */
