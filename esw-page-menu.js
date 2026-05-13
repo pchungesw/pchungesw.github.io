@@ -984,26 +984,38 @@
     _loadSavedConfigs: function () {
       fetch(ESWMenu.CONFIGS_URL + "?t=" + Date.now()) // cache bust
         .then(function (response) {
-          if (!response.ok) throw new Error("Failed to load configurations");
+          if (!response.ok) {
+            throw new Error("HTTP " + response.status + ": " + response.statusText);
+          }
           return response.json();
         })
         .then(function (data) {
-          ESWMenu._savedConfigs = data.configurations || [];
+          console.log("Loaded configurations:", data);
+          if (!data || !data.configurations) {
+            throw new Error("Invalid configuration file format - missing 'configurations' array");
+          }
+          ESWMenu._savedConfigs = data.configurations;
+          console.log("Found " + ESWMenu._savedConfigs.length + " configuration(s)");
           ESWMenu._populateSavedConfigsDropdown();
+          if (ESWMenu._savedConfigs.length > 0) {
+            ESWMenu.showToast("Loaded " + ESWMenu._savedConfigs.length + " configuration(s)", "success");
+          }
         })
         .catch(function (err) {
           console.error("Error loading saved configs:", err);
+          console.error("Error details:", err.message);
           // Try to load from localStorage as fallback
           try {
             const local = localStorage.getItem("eswLocalConfigs");
             if (local) {
               ESWMenu._savedConfigs = JSON.parse(local);
               ESWMenu._populateSavedConfigsDropdown();
-              ESWMenu.showToast("Loaded configurations from local storage", "info");
+              ESWMenu.showToast("Loaded configurations from local storage (GitHub unavailable)", "info");
             } else {
-              ESWMenu.showToast("Unable to load saved configurations", "error");
+              ESWMenu.showToast("Unable to load configurations: " + err.message, "error");
             }
           } catch (e) {
+            console.error("localStorage fallback failed:", e);
             ESWMenu.showToast("Unable to load saved configurations", "error");
           }
         });
@@ -1018,18 +1030,41 @@
     /* Populate the saved configurations dropdown */
     _populateSavedConfigsDropdown: function () {
       const select = document.getElementById("eswSavedConfigSelect");
-      if (!select) return;
+      if (!select) {
+        console.warn("Saved config dropdown not found in DOM");
+        return;
+      }
 
       // Clear existing options except the first (placeholder)
       select.innerHTML = '<option value="">-- Select a configuration --</option>';
 
+      if (!ESWMenu._savedConfigs || ESWMenu._savedConfigs.length === 0) {
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = "No configurations available";
+        option.disabled = true;
+        select.appendChild(option);
+        return;
+      }
+
       // Add options for each saved config
       ESWMenu._savedConfigs.forEach(function (config, index) {
-        const option = document.createElement("option");
-        option.value = index;
-        // Format: "Name (InstanceType/Instance, ClientType)"
-        option.textContent = config.name + " (" + config.instanceType + "/" + config.instance + ", " + config.clientType + ")";
-        select.appendChild(option);
+        try {
+          // Validate required fields
+          if (!config.name || !config.instanceType || !config.instance || !config.clientType) {
+            console.error("Invalid config at index " + index + ":", config);
+            return; // Skip this config
+          }
+
+          const option = document.createElement("option");
+          option.value = index;
+          // Format: "Name (InstanceType/Instance, ClientType)"
+          option.textContent = config.name + " (" + config.instanceType + "/" + config.instance + ", " + config.clientType + ")";
+          select.appendChild(option);
+          console.log("Added config option:", option.textContent);
+        } catch (e) {
+          console.error("Error adding config at index " + index + ":", e);
+        }
       });
     },
 
