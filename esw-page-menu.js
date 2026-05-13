@@ -487,52 +487,125 @@
           </div>
           <div class="esw-collapsible-content" id="eswDeployContent">
 
-            <div class="esw-form-field">
-              <label for="eswDeploySnippet">Paste Code Snippet</label>
-              <p>
-                In Salesforce Setup, open your Embedded Service deployment and copy the code snippet
-                from the <strong>Code Snippets</strong> section. Paste the entire snippet (or just the
-                <code>embeddedservice_bootstrap.init(...)</code> block) below — the fields will
-                be populated automatically.
-              </p>
-              <textarea id="eswDeploySnippet" rows="5"
-                        placeholder="Paste the embeddedservice_bootstrap.init(...) block or the full &lt;script&gt; snippet here..."
-                        style="font-family:monospace;font-size:0.8rem;resize:vertical;width:100%;box-sizing:border-box;"
-                        oninput="ESWMenu._parseSnippet()"></textarea>
-              <p id="eswSnippetStatus" style="font-size:0.8rem;margin-top:0.25rem;min-height:1.2em;"></p>
-            </div>
-
-            <div id="eswDeployFields">
-              <div class="esw-form-field">
-                <label for="eswDeployOrgId">Org ID</label>
-                <input type="text" id="eswDeployOrgId" maxlength="15"
-                       placeholder="15-character Org ID"
-                       value="${d.orgId || ""}">
-              </div>
-              <div class="esw-form-field">
-                <label for="eswDeployApiName">Deployment API Name</label>
-                <input type="text" id="eswDeployApiName" maxlength="18"
-                       placeholder="Embedded Service Deployment API name"
-                       value="${d.deploymentName || ""}">
-              </div>
-              <div class="esw-form-field">
-                <label for="eswDeploySiteEndpoint">Site Endpoint</label>
-                <input type="url" id="eswDeploySiteEndpoint"
-                       placeholder="https://example.my.site.com/ESWDeploymentName"
-                       value="${d.siteEndpoint || ""}">
-              </div>
-              <div class="esw-form-field">
-                <label for="eswDeployScrt2">SCRT2 Endpoint</label>
-                <input type="url" id="eswDeployScrt2"
-                       placeholder="https://example.my.salesforce-scrt.com"
-                       value="${d.scrt2URL || ""}">
+            <!-- Configuration Mode Toggle -->
+            <div class="esw-toggle-row" style="margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid rgba(255,255,255,0.08);">
+              <label style="font-weight:600;">Configuration Mode</label>
+              <div style="display:flex;align-items:center;gap:0.5rem;">
+                <span class="esw-toggle-label" id="eswConfigModeLabel" style="margin:0;">Manual</span>
+                <label class="esw-toggle">
+                  <input type="checkbox" id="eswConfigModeToggle" onchange="ESWMenu._toggleConfigMode()">
+                  <span class="esw-toggle-track"></span>
+                </label>
+                <span class="esw-toggle-label" style="margin:0;">Saved</span>
               </div>
             </div>
 
-            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem;">
-              <button class="btn-brand" onclick="ESWMenu._applyDeploymentSettings()">Update</button>
-              <button class="btn-neutral" id="eswClearOverrideBtn"
-                      onclick="ESWMenu._clearDeploymentOverride()" style="display:none;">Clear Override</button>
+            <!-- Saved Configuration Mode -->
+            <div id="eswSavedConfigMode" style="display:none;">
+              <div class="esw-form-field">
+                <label for="eswSavedConfigSelect">Select Configuration</label>
+                <select id="eswSavedConfigSelect"
+                        style="width:100%;padding:0.45rem 0.6rem;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:6px;box-sizing:border-box;font-size:0.8rem;color:#e8e8f0;font-family:'Inter','Segoe UI',sans-serif;"
+                        onchange="ESWMenu._onSavedConfigSelect()">
+                  <option value="">-- Select a configuration --</option>
+                </select>
+              </div>
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem;">
+                <button class="btn-brand" id="eswLoadConfigBtn" onclick="ESWMenu._loadSelectedConfig()" disabled
+                        style="opacity:0.5;cursor:not-allowed;">Load Configuration</button>
+                <button class="btn-neutral" onclick="ESWMenu._refreshSavedConfigs()">Refresh List</button>
+              </div>
+            </div>
+
+            <!-- Manual Configuration Mode -->
+            <div id="eswManualConfigMode">
+              <div class="esw-form-field">
+                <label for="eswDeploySnippet">Paste Code Snippet</label>
+                <p>
+                  In Salesforce Setup, open your Embedded Service deployment and copy the code snippet
+                  from the <strong>Code Snippets</strong> section. Paste the entire snippet (or just the
+                  <code>embeddedservice_bootstrap.init(...)</code> block) below — the fields will
+                  be populated automatically.
+                </p>
+                <textarea id="eswDeploySnippet" rows="5"
+                          placeholder="Paste the embeddedservice_bootstrap.init(...) block or the full &lt;script&gt; snippet here..."
+                          style="font-family:monospace;font-size:0.8rem;resize:vertical;width:100%;box-sizing:border-box;"
+                          oninput="ESWMenu._parseSnippet()"></textarea>
+                <p id="eswSnippetStatus" style="font-size:0.8rem;margin-top:0.25rem;min-height:1.2em;"></p>
+              </div>
+
+              <div id="eswDeployFields">
+                <div class="esw-form-field">
+                  <label for="eswDeployOrgId">Org ID</label>
+                  <input type="text" id="eswDeployOrgId" maxlength="15"
+                         placeholder="15-character Org ID"
+                         value="${d.orgId || ""}">
+                </div>
+                <div class="esw-form-field">
+                  <label for="eswDeployApiName">Deployment API Name</label>
+                  <input type="text" id="eswDeployApiName" maxlength="18"
+                         placeholder="Embedded Service Deployment API name"
+                         value="${d.deploymentName || ""}">
+                </div>
+                <div class="esw-form-field">
+                  <label for="eswDeploySiteEndpoint">Site Endpoint</label>
+                  <input type="url" id="eswDeploySiteEndpoint"
+                         placeholder="https://example.my.site.com/ESWDeploymentName"
+                         value="${d.siteEndpoint || ""}">
+                </div>
+                <div class="esw-form-field">
+                  <label for="eswDeployScrt2">SCRT2 Endpoint</label>
+                  <input type="url" id="eswDeployScrt2"
+                         placeholder="https://example.my.salesforce-scrt.com"
+                         value="${d.scrt2URL || ""}">
+                </div>
+              </div>
+
+              <!-- Save Configuration Checkbox -->
+              <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.08);">
+                <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.8rem;color:#c8c8e0;">
+                  <input type="checkbox" id="eswSaveConfigCheckbox" onchange="ESWMenu._toggleSaveConfigFields()"
+                         style="cursor:pointer;">
+                  <span>Save this configuration for future use</span>
+                </label>
+              </div>
+
+              <!-- Additional Fields for Saving -->
+              <div id="eswSaveConfigFields" style="display:none;margin-top:1rem;">
+                <div class="esw-form-field">
+                  <label for="eswConfigName">Configuration Name*</label>
+                  <input type="text" id="eswConfigName" placeholder="e.g., Production Org">
+                </div>
+                <div class="esw-form-field">
+                  <label for="eswConfigInstance">Instance*</label>
+                  <input type="text" id="eswConfigInstance" placeholder="e.g., USA794">
+                </div>
+                <div class="esw-form-field">
+                  <label for="eswConfigInstanceType">Instance Type*</label>
+                  <select id="eswConfigInstanceType"
+                          style="width:100%;padding:0.45rem 0.6rem;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:6px;box-sizing:border-box;font-size:0.8rem;color:#e8e8f0;font-family:'Inter','Segoe UI',sans-serif;">
+                    <option value="">-- Select --</option>
+                    <option value="Prod">Prod</option>
+                    <option value="Test">Test</option>
+                    <option value="Dev">Dev</option>
+                  </select>
+                </div>
+                <div class="esw-form-field">
+                  <label for="eswConfigClientType">Client Type*</label>
+                  <select id="eswConfigClientType"
+                          style="width:100%;padding:0.45rem 0.6rem;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:6px;box-sizing:border-box;font-size:0.8rem;color:#e8e8f0;font-family:'Inter','Segoe UI',sans-serif;">
+                    <option value="">-- Select --</option>
+                    <option value="v1">v1</option>
+                    <option value="v2">v2</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:1rem;">
+                <button class="btn-brand" onclick="ESWMenu._applyDeploymentSettings()">Update</button>
+                <button class="btn-neutral" id="eswClearOverrideBtn"
+                        onclick="ESWMenu._clearDeploymentOverride()" style="display:none;">Clear Override</button>
+              </div>
             </div>
           </div>
         </div>`);
@@ -872,6 +945,135 @@
 
     /* ── Deployment Settings ────────────────────────────────────────────── */
 
+    /* Configuration storage file URL */
+    CONFIGS_URL: "https://raw.githubusercontent.com/pchungesw/pchungesw.github.io/main/deployment-configs.json",
+
+    /* In-memory cache of saved configurations */
+    _savedConfigs: [],
+
+    /* Toggle between Manual and Saved Configuration modes */
+    _toggleConfigMode: function () {
+      const toggle = document.getElementById("eswConfigModeToggle");
+      const manualMode = document.getElementById("eswManualConfigMode");
+      const savedMode = document.getElementById("eswSavedConfigMode");
+
+      if (toggle && manualMode && savedMode) {
+        if (toggle.checked) {
+          // Saved mode
+          manualMode.style.display = "none";
+          savedMode.style.display = "block";
+          ESWMenu._loadSavedConfigs();
+        } else {
+          // Manual mode
+          manualMode.style.display = "block";
+          savedMode.style.display = "none";
+        }
+      }
+    },
+
+    /* Toggle visibility of save configuration fields */
+    _toggleSaveConfigFields: function () {
+      const checkbox = document.getElementById("eswSaveConfigCheckbox");
+      const fields = document.getElementById("eswSaveConfigFields");
+      if (checkbox && fields) {
+        fields.style.display = checkbox.checked ? "block" : "none";
+      }
+    },
+
+    /* Load saved configurations from GitHub */
+    _loadSavedConfigs: function () {
+      fetch(ESWMenu.CONFIGS_URL + "?t=" + Date.now()) // cache bust
+        .then(function (response) {
+          if (!response.ok) throw new Error("Failed to load configurations");
+          return response.json();
+        })
+        .then(function (data) {
+          ESWMenu._savedConfigs = data.configurations || [];
+          ESWMenu._populateSavedConfigsDropdown();
+        })
+        .catch(function (err) {
+          console.error("Error loading saved configs:", err);
+          // Try to load from localStorage as fallback
+          try {
+            const local = localStorage.getItem("eswLocalConfigs");
+            if (local) {
+              ESWMenu._savedConfigs = JSON.parse(local);
+              ESWMenu._populateSavedConfigsDropdown();
+              ESWMenu.showToast("Loaded configurations from local storage", "info");
+            } else {
+              ESWMenu.showToast("Unable to load saved configurations", "error");
+            }
+          } catch (e) {
+            ESWMenu.showToast("Unable to load saved configurations", "error");
+          }
+        });
+    },
+
+    /* Refresh the saved configurations list */
+    _refreshSavedConfigs: function () {
+      ESWMenu._loadSavedConfigs();
+      ESWMenu.showToast("Refreshing configuration list...", "info");
+    },
+
+    /* Populate the saved configurations dropdown */
+    _populateSavedConfigsDropdown: function () {
+      const select = document.getElementById("eswSavedConfigSelect");
+      if (!select) return;
+
+      // Clear existing options except the first (placeholder)
+      select.innerHTML = '<option value="">-- Select a configuration --</option>';
+
+      // Add options for each saved config
+      ESWMenu._savedConfigs.forEach(function (config, index) {
+        const option = document.createElement("option");
+        option.value = index;
+        // Format: "Name (InstanceType/Instance, ClientType)"
+        option.textContent = config.name + " (" + config.instanceType + "/" + config.instance + ", " + config.clientType + ")";
+        select.appendChild(option);
+      });
+    },
+
+    /* Enable/disable load button when selection changes */
+    _onSavedConfigSelect: function () {
+      const select = document.getElementById("eswSavedConfigSelect");
+      const loadBtn = document.getElementById("eswLoadConfigBtn");
+
+      if (select && loadBtn) {
+        const hasSelection = select.value !== "";
+        loadBtn.disabled = !hasSelection;
+        loadBtn.style.opacity = hasSelection ? "1" : "0.5";
+        loadBtn.style.cursor = hasSelection ? "pointer" : "not-allowed";
+      }
+    },
+
+    /* Load the selected configuration and reload the page */
+    _loadSelectedConfig: function () {
+      const select = document.getElementById("eswSavedConfigSelect");
+      if (!select || select.value === "") return;
+
+      const index = parseInt(select.value, 10);
+      const config = ESWMenu._savedConfigs[index];
+
+      if (!config) {
+        ESWMenu.showToast("Configuration not found", "error");
+        return;
+      }
+
+      // Store in sessionStorage and reload
+      try {
+        sessionStorage.setItem("eswDeployOverride", JSON.stringify({
+          orgId: config.orgId,
+          deploymentName: config.deploymentName,
+          siteEndpoint: config.siteEndpoint,
+          scrt2URL: config.scrt2URL
+        }));
+        ESWMenu.showToast("Loading configuration: " + config.name, "success");
+        setTimeout(function () { location.reload(); }, 800);
+      } catch (e) {
+        ESWMenu.showToast("Failed to load configuration", "error");
+      }
+    },
+
     _restoreDeploymentSettings: function () {
       try {
         const saved = sessionStorage.getItem("eswDeployOverride");
@@ -1059,6 +1261,33 @@
         return;
       }
 
+      // Check if user wants to save this configuration
+      const saveCheckbox = document.getElementById("eswSaveConfigCheckbox");
+      if (saveCheckbox && saveCheckbox.checked) {
+        const name = (document.getElementById("eswConfigName").value || "").trim();
+        const instance = (document.getElementById("eswConfigInstance").value || "").trim();
+        const instanceType = document.getElementById("eswConfigInstanceType").value;
+        const clientType = document.getElementById("eswConfigClientType").value;
+
+        if (!name || !instance || !instanceType || !clientType) {
+          ESWMenu.showToast("Please fill in all configuration metadata fields", "error");
+          return;
+        }
+
+        // Show instructions for saving to GitHub
+        ESWMenu._showSaveConfigInstructions({
+          orgId: orgId,
+          deploymentName: deploymentName,
+          siteEndpoint: siteEndpoint,
+          scrt2URL: scrt2URL,
+          name: name,
+          instance: instance,
+          instanceType: instanceType,
+          clientType: clientType
+        });
+        return; // Don't reload yet, let user save to GitHub first
+      }
+
       // Persist in sessionStorage so the values survive the reload
       try {
         sessionStorage.setItem("eswDeployOverride", JSON.stringify({
@@ -1068,6 +1297,136 @@
 
       ESWMenu.showToast("Reloading with new deployment settings…", "info");
       setTimeout(function () { location.reload(); }, 800);
+    },
+
+    /* Show instructions for saving configuration to GitHub */
+    _showSaveConfigInstructions: function (config) {
+      const configJson = JSON.stringify(config, null, 2);
+
+      // Save to localStorage as backup
+      try {
+        const localConfigs = localStorage.getItem("eswLocalConfigs");
+        let configs = localConfigs ? JSON.parse(localConfigs) : [];
+
+        // Check if config already exists by name
+        const existingIndex = configs.findIndex(function (c) { return c.name === config.name; });
+        if (existingIndex >= 0) {
+          configs[existingIndex] = config;
+        } else {
+          configs.push(config);
+        }
+
+        localStorage.setItem("eswLocalConfigs", JSON.stringify(configs));
+        ESWMenu.showToast("Configuration saved locally", "success");
+      } catch (e) {
+        console.error("Failed to save to localStorage:", e);
+      }
+
+      // Create modal for instructions
+      const modal = document.createElement("div");
+      modal.id = "eswSaveConfigModal";
+      modal.style.cssText = [
+        "position:fixed",
+        "top:0",
+        "left:0",
+        "right:0",
+        "bottom:0",
+        "background:rgba(0,0,0,0.8)",
+        "z-index:10000",
+        "display:flex",
+        "align-items:center",
+        "justify-content:center",
+        "padding:2rem"
+      ].join(";");
+
+      const modalContent = document.createElement("div");
+      modalContent.style.cssText = [
+        "background:#0d0d14",
+        "border:1px solid rgba(255,255,255,0.2)",
+        "border-radius:8px",
+        "padding:2rem",
+        "max-width:700px",
+        "width:100%",
+        "max-height:80vh",
+        "overflow-y:auto",
+        "color:#e8e8f0",
+        "font-family:'Inter','Segoe UI',sans-serif"
+      ].join(";");
+
+      modalContent.innerHTML = `
+        <h2 style="margin-top:0;color:#fff;font-size:1.25rem;">Save Configuration to GitHub</h2>
+        <p style="color:#c0c0d8;font-size:0.875rem;line-height:1.6;">
+          To make this configuration available to all users, follow these steps:
+        </p>
+        <ol style="color:#c0c0d8;font-size:0.875rem;line-height:1.8;padding-left:1.5rem;">
+          <li>Copy the JSON configuration below</li>
+          <li>Open <a href="https://github.com/pchungesw/pchungesw.github.io/blob/main/deployment-configs.json" target="_blank" style="color:#a070f0;">deployment-configs.json</a> in GitHub</li>
+          <li>Click "Edit" (pencil icon)</li>
+          <li>Add this configuration to the <code style="background:rgba(255,255,255,0.08);padding:0.1em 0.3em;border-radius:3px;color:#c8a0ff;">configurations</code> array</li>
+          <li>Commit the changes</li>
+          <li>Click "Continue" below to reload with this configuration</li>
+        </ol>
+        <div style="margin:1rem 0;">
+          <label style="display:block;font-weight:600;margin-bottom:0.5rem;font-size:0.875rem;">Configuration JSON:</label>
+          <textarea id="eswConfigJsonOutput" readonly
+                    style="width:100%;height:200px;padding:0.75rem;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.12);border-radius:6px;font-family:'Courier New',monospace;font-size:0.75rem;color:#e8e8f0;resize:vertical;box-sizing:border-box;">${configJson}</textarea>
+        </div>
+        <div style="display:flex;gap:0.5rem;margin-top:1.5rem;">
+          <button onclick="ESWMenu._copyConfigJson()" class="btn-brand" style="background:linear-gradient(135deg,#7b2ff7,#5a1bc2);border:none;border-radius:6px;color:#fff;font-family:'Inter','Segoe UI',sans-serif;font-size:0.875rem;font-weight:600;padding:0.5rem 1.25rem;cursor:pointer;">
+            Copy JSON
+          </button>
+          <button onclick="ESWMenu._continueAfterSave()" class="btn-brand" style="background:linear-gradient(135deg,#7b2ff7,#5a1bc2);border:none;border-radius:6px;color:#fff;font-family:'Inter','Segoe UI',sans-serif;font-size:0.875rem;font-weight:600;padding:0.5rem 1.25rem;cursor:pointer;">
+            Continue
+          </button>
+          <button onclick="ESWMenu._closeSaveConfigModal()" class="btn-neutral" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.14);border-radius:6px;color:#c8c8e0;font-family:'Inter','Segoe UI',sans-serif;font-size:0.875rem;padding:0.5rem 1.25rem;cursor:pointer;">
+            Cancel
+          </button>
+        </div>
+      `;
+
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+    },
+
+    /* Copy configuration JSON to clipboard */
+    _copyConfigJson: function () {
+      const textarea = document.getElementById("eswConfigJsonOutput");
+      if (textarea) {
+        textarea.select();
+        document.execCommand("copy");
+        ESWMenu.showToast("Configuration JSON copied to clipboard", "success");
+      }
+    },
+
+    /* Continue after saving configuration */
+    _continueAfterSave: function () {
+      ESWMenu._closeSaveConfigModal();
+
+      // Get the config from the form and apply it
+      const orgId = document.getElementById("eswDeployOrgId").value.trim();
+      const deploymentName = document.getElementById("eswDeployApiName").value.trim();
+      const siteEndpoint = document.getElementById("eswDeploySiteEndpoint").value.trim();
+      const scrt2URL = document.getElementById("eswDeployScrt2").value.trim();
+
+      try {
+        sessionStorage.setItem("eswDeployOverride", JSON.stringify({
+          orgId: orgId,
+          deploymentName: deploymentName,
+          siteEndpoint: siteEndpoint,
+          scrt2URL: scrt2URL
+        }));
+      } catch (e) { /* ignore */ }
+
+      ESWMenu.showToast("Reloading with new deployment settings…", "info");
+      setTimeout(function () { location.reload(); }, 800);
+    },
+
+    /* Close save config modal */
+    _closeSaveConfigModal: function () {
+      const modal = document.getElementById("eswSaveConfigModal");
+      if (modal && modal.parentNode) {
+        modal.parentNode.removeChild(modal);
+      }
     },
 
     /**
