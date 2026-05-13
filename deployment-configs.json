@@ -10,5 +10,15 @@
       "instanceType": "Prod",
       "clientType": "v1"
     }
+    {
+      "orgId": "00DWs00000CvEVZ",
+      "deploymentName": "MIAW_Direct_to_Service_Rep_2",
+      "siteEndpoint": "https://agentforceweb.demo.my.site.com/ESWMIAWDirecttoService1754418132529",
+      "scrt2URL": "https://agentforceweb.demo.my.salesforce-scrt.com",
+      "name": "Agentforceweb",
+      "instance": "USA794",
+      "instanceType": "Prod",
+      "clientType": "v2"
+    }
   ]
 }
