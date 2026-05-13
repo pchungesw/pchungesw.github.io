@@ -502,6 +502,15 @@
 
             <!-- Saved Configuration Mode -->
             <div id="eswSavedConfigMode" style="display:none;">
+              <!-- Show Local Only Toggle -->
+              <div class="esw-toggle-row" style="margin-bottom:1rem;">
+                <label style="font-size:0.8rem;">Show Local Only</label>
+                <label class="esw-toggle">
+                  <input type="checkbox" id="eswShowLocalOnlyToggle" onchange="ESWMenu._toggleShowLocalOnly()">
+                  <span class="esw-toggle-track"></span>
+                </label>
+              </div>
+
               <div class="esw-form-field">
                 <label for="eswSavedConfigSelect">Select Configuration</label>
                 <select id="eswSavedConfigSelect"
@@ -1109,6 +1118,11 @@
       ESWMenu.showToast("Refreshing configuration list...", "info");
     },
 
+    /* Toggle to show local-only configurations */
+    _toggleShowLocalOnly: function () {
+      ESWMenu._populateSavedConfigsDropdown();
+    },
+
     /* Populate the saved configurations dropdown */
     _populateSavedConfigsDropdown: function () {
       const select = document.getElementById("eswSavedConfigSelect");
@@ -1116,6 +1130,10 @@
         console.warn("Saved config dropdown not found in DOM");
         return;
       }
+
+      // Check if "Show Local Only" is enabled
+      const showLocalOnlyToggle = document.getElementById("eswShowLocalOnlyToggle");
+      const showLocalOnly = showLocalOnlyToggle && showLocalOnlyToggle.checked;
 
       // Clear existing options except the first (placeholder)
       select.innerHTML = '<option value="">-- Select a configuration --</option>';
@@ -1129,17 +1147,37 @@
         return;
       }
 
+      // Filter configurations if needed
+      var configsToShow = ESWMenu._savedConfigs;
+      if (showLocalOnly) {
+        configsToShow = ESWMenu._savedConfigs.filter(function (config) {
+          return config._source === "local";
+        });
+      }
+
+      if (configsToShow.length === 0) {
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = "No local configurations available";
+        option.disabled = true;
+        select.appendChild(option);
+        return;
+      }
+
       // Add options for each saved config
-      ESWMenu._savedConfigs.forEach(function (config, index) {
+      configsToShow.forEach(function (config, displayIndex) {
         try {
           // Validate required fields
           if (!config.name || !config.instanceType || !config.instance || !config.clientType) {
-            console.error("Invalid config at index " + index + ":", config);
+            console.error("Invalid config:", config);
             return; // Skip this config
           }
 
+          // Find the original index in _savedConfigs for value attribute
+          var originalIndex = ESWMenu._savedConfigs.indexOf(config);
+
           const option = document.createElement("option");
-          option.value = index;
+          option.value = originalIndex;
           // Format: "Name (InstanceType/Instance, ClientType) [Local]"
           var label = config.name + " (" + config.instanceType + "/" + config.instance + ", " + config.clientType + ")";
           if (config._source === "local") {
@@ -1149,9 +1187,11 @@
           select.appendChild(option);
           console.log("Added config option:", option.textContent);
         } catch (e) {
-          console.error("Error adding config at index " + index + ":", e);
+          console.error("Error adding config:", e);
         }
       });
+
+      console.log("Displayed " + configsToShow.length + " of " + ESWMenu._savedConfigs.length + " total configurations");
     },
 
     /* Enable/disable load button when selection changes */
