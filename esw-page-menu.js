@@ -523,6 +523,8 @@
                 <button class="btn-brand" id="eswLoadConfigBtn" onclick="ESWMenu._loadSelectedConfig()" disabled
                         style="opacity:0.5;cursor:not-allowed;">Load Configuration</button>
                 <button class="btn-neutral" onclick="ESWMenu._refreshSavedConfigs()">Refresh List</button>
+                <button class="btn-neutral" onclick="ESWMenu._clearLocalConfigs()"
+                        style="background:rgba(200,50,50,0.15);border-color:rgba(200,50,50,0.3);color:#ff9999;">Clear Local Configs</button>
               </div>
             </div>
 
@@ -1121,6 +1123,38 @@
     /* Toggle to show local-only configurations */
     _toggleShowLocalOnly: function () {
       ESWMenu._populateSavedConfigsDropdown();
+    },
+
+    /* Clear all local configurations from localStorage */
+    _clearLocalConfigs: function () {
+      // Confirm with user first
+      if (!confirm("Are you sure you want to clear all locally saved configurations?\n\nThis action cannot be undone.\n\nConfigurations saved to GitHub will not be affected.")) {
+        return;
+      }
+
+      try {
+        // Get current count for confirmation message
+        const local = localStorage.getItem("eswLocalConfigs");
+        const count = local ? JSON.parse(local).length : 0;
+
+        // Clear from localStorage
+        localStorage.removeItem("eswLocalConfigs");
+        console.log("Cleared " + count + " local configuration(s)");
+
+        // Reload configurations (will now only show GitHub configs)
+        ESWMenu._loadSavedConfigs();
+
+        // Reset the "Show Local Only" toggle if it was on
+        const toggle = document.getElementById("eswShowLocalOnlyToggle");
+        if (toggle && toggle.checked) {
+          toggle.checked = false;
+        }
+
+        ESWMenu.showToast("Cleared " + count + " local configuration(s)", "success");
+      } catch (e) {
+        console.error("Error clearing local configs:", e);
+        ESWMenu.showToast("Failed to clear local configurations", "error");
+      }
     },
 
     /* Populate the saved configurations dropdown */
