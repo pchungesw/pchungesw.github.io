@@ -683,12 +683,12 @@
         </div>`);
     }
 
-    /* 6 · Inline Mode (v2 Only) */
+    /* 6 · Inline Mode */
     if (cfg.inlineMode && cfg.inlineMode.enabled) {
       sections.push(`
         <div class="esw-collapsible-section">
           <div class="esw-collapsible-header" onclick="ESWMenu._toggleSection('eswInlineModeContent','eswInlineModeIcon')">
-            <h3>Inline Mode (v2 Only)</h3>
+            <h3>Inline Mode</h3>
             <span id="eswInlineModeIcon">&#9660;</span>
           </div>
           <div class="esw-collapsible-content" id="eswInlineModeContent">
