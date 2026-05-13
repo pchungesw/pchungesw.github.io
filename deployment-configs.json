@@ -15,7 +15,7 @@
       "deploymentName": "MIAW_Direct_to_Service_Rep_2",
       "siteEndpoint": "https://agentforceweb.demo.my.site.com/ESWMIAWDirecttoService1754418132529",
       "scrt2URL": "https://agentforceweb.demo.my.salesforce-scrt.com",
-      "name": "Agentforceweb",
+      "name": "Agentforceweb demo org",
       "instance": "USA794",
       "instanceType": "Prod",
       "clientType": "v2"
