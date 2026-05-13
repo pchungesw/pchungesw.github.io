@@ -980,8 +980,12 @@
       }
     },
 
-    /* Load saved configurations from GitHub */
+    /* Load saved configurations from GitHub and localStorage, then merge */
     _loadSavedConfigs: function () {
+      var githubConfigs = [];
+      var localConfigs = [];
+
+      // Load from GitHub
       fetch(ESWMenu.CONFIGS_URL + "?t=" + Date.now()) // cache bust
         .then(function (response) {
           if (!response.ok) {
@@ -990,35 +994,113 @@
           return response.json();
         })
         .then(function (data) {
-          console.log("Loaded configurations:", data);
-          if (!data || !data.configurations) {
-            throw new Error("Invalid configuration file format - missing 'configurations' array");
+          console.log("Loaded configurations from GitHub:", data);
+          if (data && data.configurations) {
+            githubConfigs = data.configurations;
+            console.log("Found " + githubConfigs.length + " GitHub configuration(s)");
           }
-          ESWMenu._savedConfigs = data.configurations;
-          console.log("Found " + ESWMenu._savedConfigs.length + " configuration(s)");
+          return ESWMenu._loadLocalConfigs();
+        })
+        .then(function (local) {
+          localConfigs = local;
+          console.log("Found " + localConfigs.length + " local configuration(s)");
+          return ESWMenu._mergeConfigs(githubConfigs, localConfigs);
+        })
+        .then(function (merged) {
+          ESWMenu._savedConfigs = merged;
           ESWMenu._populateSavedConfigsDropdown();
-          if (ESWMenu._savedConfigs.length > 0) {
-            ESWMenu.showToast("Loaded " + ESWMenu._savedConfigs.length + " configuration(s)", "success");
+
+          var githubCount = githubConfigs.length;
+          var localCount = localConfigs.length;
+          var totalCount = merged.length;
+
+          if (totalCount > 0) {
+            var msg = "Loaded " + totalCount + " configuration(s)";
+            if (githubCount > 0 && localCount > 0) {
+              msg += " (" + githubCount + " shared, " + localCount + " local)";
+            } else if (githubCount > 0) {
+              msg += " (shared)";
+            } else if (localCount > 0) {
+              msg += " (local only)";
+            }
+            ESWMenu.showToast(msg, "success");
           }
         })
         .catch(function (err) {
           console.error("Error loading saved configs:", err);
           console.error("Error details:", err.message);
-          // Try to load from localStorage as fallback
-          try {
-            const local = localStorage.getItem("eswLocalConfigs");
-            if (local) {
-              ESWMenu._savedConfigs = JSON.parse(local);
-              ESWMenu._populateSavedConfigsDropdown();
-              ESWMenu.showToast("Loaded configurations from local storage (GitHub unavailable)", "info");
-            } else {
-              ESWMenu.showToast("Unable to load configurations: " + err.message, "error");
-            }
-          } catch (e) {
-            console.error("localStorage fallback failed:", e);
-            ESWMenu.showToast("Unable to load saved configurations", "error");
-          }
+
+          // Even if GitHub fails, try to load local configs
+          ESWMenu._loadLocalConfigs()
+            .then(function (local) {
+              if (local && local.length > 0) {
+                ESWMenu._savedConfigs = local;
+                ESWMenu._populateSavedConfigsDropdown();
+                ESWMenu.showToast("Loaded " + local.length + " local configuration(s) (GitHub unavailable)", "info");
+              } else {
+                ESWMenu.showToast("Unable to load configurations: " + err.message, "error");
+              }
+            })
+            .catch(function (e) {
+              console.error("localStorage fallback failed:", e);
+              ESWMenu.showToast("Unable to load saved configurations", "error");
+            });
         });
+    },
+
+    /* Load configurations from localStorage */
+    _loadLocalConfigs: function () {
+      return new Promise(function (resolve) {
+        try {
+          const local = localStorage.getItem("eswLocalConfigs");
+          if (local) {
+            const configs = JSON.parse(local);
+            resolve(Array.isArray(configs) ? configs : []);
+          } else {
+            resolve([]);
+          }
+        } catch (e) {
+          console.error("Error loading from localStorage:", e);
+          resolve([]);
+        }
+      });
+    },
+
+    /* Merge GitHub and local configs, deduplicating by orgId + deploymentName */
+    _mergeConfigs: function (githubConfigs, localConfigs) {
+      var configMap = {};
+
+      // Add GitHub configs first (they take precedence)
+      githubConfigs.forEach(function (config) {
+        var key = config.orgId + "|" + config.deploymentName;
+        var configCopy = Object.assign({}, config);
+        configCopy._source = "github"; // Mark source
+        configMap[key] = configCopy;
+      });
+
+      // Add local configs (only if not already present from GitHub)
+      localConfigs.forEach(function (config) {
+        var key = config.orgId + "|" + config.deploymentName;
+        if (!configMap[key]) {
+          var configCopy = Object.assign({}, config);
+          configCopy._source = "local"; // Mark source
+          configMap[key] = configCopy;
+        } else {
+          console.log("Skipping duplicate local config:", config.name, "(already in GitHub)");
+        }
+      });
+
+      // Convert map back to array, sorted by name
+      var merged = Object.keys(configMap).map(function (key) {
+        return configMap[key];
+      });
+
+      merged.sort(function (a, b) {
+        return a.name.localeCompare(b.name);
+      });
+
+      console.log("Merged configurations:", merged.length, "total");
+      return merged;
     },
 
     /* Refresh the saved configurations list */
@@ -1058,8 +1140,12 @@
 
           const option = document.createElement("option");
           option.value = index;
-          // Format: "Name (InstanceType/Instance, ClientType)"
-          option.textContent = config.name + " (" + config.instanceType + "/" + config.instance + ", " + config.clientType + ")";
+          // Format: "Name (InstanceType/Instance, ClientType) [Local]"
+          var label = config.name + " (" + config.instanceType + "/" + config.instance + ", " + config.clientType + ")";
+          if (config._source === "local") {
+            label += " [Local]";
+          }
+          option.textContent = label;
           select.appendChild(option);
           console.log("Added config option:", option.textContent);
         } catch (e) {
