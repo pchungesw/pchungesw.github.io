@@ -823,6 +823,11 @@
       if (menuSlot && toggleBtn) {
         menuSlot.appendChild(toggleBtn);
       }
+
+      // Pre-load saved configurations on init for faster access
+      if (_cfg.deploymentSettings && _cfg.deploymentSettings.enabled) {
+        ESWMenu._loadSavedConfigs();
+      }
     },
 
     /* Toggle the slide panel open / closed */
@@ -973,7 +978,13 @@
           // Saved mode
           manualMode.style.display = "none";
           savedMode.style.display = "block";
-          ESWMenu._loadSavedConfigs();
+          // Only load if not already loaded
+          if (!ESWMenu._savedConfigs || ESWMenu._savedConfigs.length === 0) {
+            ESWMenu._loadSavedConfigs();
+          } else {
+            // Re-populate dropdown with existing configs
+            ESWMenu._populateSavedConfigsDropdown();
+          }
         } else {
           // Manual mode
           manualMode.style.display = "block";
