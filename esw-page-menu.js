@@ -338,16 +338,16 @@
 
       /* ── Event log (inside panel) ───────────────────────────────────── */
       #eswEventLog {
-        border: 1px solid rgba(255,255,255,0.08);
+        border: 1px solid rgba(0,0,0,0.12);
         border-radius: 6px;
-        background: rgba(0,0,0,0.35);
+        background: #ffffff;
         padding: 1rem;
         height: 380px;
         overflow-y: auto;
         font-family: 'Courier New', monospace;
         font-size: 12px;
         margin-top: 0.75rem;
-        color: #a0a0b8;
+        color: #1a1a2e;
       }
 
       /* ── Toast ──────────────────────────────────────────────────────── */
@@ -741,7 +741,7 @@
               </label>
             </div>
             <div id="eswEventLog">
-              <div style="color:#5a5a7a;">Waiting for events...</div>
+              <div style="color:#9090a8;">Waiting for events...</div>
             </div>
           </div>
         </div>`);
@@ -877,6 +877,57 @@
       }, 1500);
     },
 
+    /* \u2500\u2500 Payload formatting helpers \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+
+    /**
+     * Recursively walk a parsed JSON object and:
+     *  1. Parse any string values that look like JSON (nested stringified objects).
+     *  2. Convert any numeric values that look like Unix-ms timestamps into
+     *     a human-readable date string appended in parentheses.
+     */
+    _formatPayload: function (obj, depth) {
+      depth = depth || 0;
+      if (depth > 6) return obj; // safety guard against infinite recursion
+
+      if (typeof obj === "string") {
+        // Try to parse nested JSON strings (e.g. entryPayload, conversationEntry)
+        var trimmed = obj.trim();
+        if ((trimmed.charAt(0) === "{" || trimmed.charAt(0) === "[") && trimmed.length > 2) {
+          try {
+            var parsed = JSON.parse(trimmed);
+            return ESWMenu._formatPayload(parsed, depth + 1);
+          } catch (e) { /* not JSON \u2014 leave as-is */ }
+        }
+        return obj;
+      }
+
+      if (typeof obj === "number") {
+        // Heuristic: 13-digit numbers in a plausible recent range are Unix-ms timestamps
+        // Range: 2020-01-01T00:00:00Z (1577836800000) to 2100-01-01T00:00:00Z (4102444800000)
+        if (obj > 1577836800000 && obj < 4102444800000 && String(Math.floor(obj)).length === 13) {
+          try {
+            var d = new Date(obj);
+            return obj + "  \u2190 " + d.toLocaleString();
+          } catch (e) { /* ignore */ }
+        }
+        return obj;
+      }
+
+      if (Array.isArray(obj)) {
+        return obj.map(function (item) { return ESWMenu._formatPayload(item, depth + 1); });
+      }
+
+      if (obj !== null && typeof obj === "object") {
+        var result = {};
+        Object.keys(obj).forEach(function (key) {
+          result[key] = ESWMenu._formatPayload(obj[key], depth + 1);
+        });
+        return result;
+      }
+
+      return obj;
+    },
+
     /* Append an entry to the in-panel event log */
     logEvent: function (eventName, eventDetail) {
       const hideReceipts = document.getElementById("eswHideReceiptsCheckbox");
@@ -895,14 +946,16 @@
         log.innerHTML = "";
       }
 
-      const detailStr = (eventDetail && Object.keys(eventDetail).length > 0)
-        ? JSON.stringify(eventDetail, null, 2)
-        : "{}";
+      // Format the detail: expand nested JSON strings + annotate timestamps
+      var formatted = (eventDetail && Object.keys(eventDetail).length > 0)
+        ? ESWMenu._formatPayload(eventDetail)
+        : {};
+      const detailStr = JSON.stringify(formatted, null, 2);
 
       const entryId = "eswEntry_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
 
       const entry = document.createElement("div");
-      entry.style.cssText = "margin-bottom:0.5rem;padding-bottom:0.5rem;border-bottom:1px solid rgba(255,255,255,0.08);";
+      entry.style.cssText = "margin-bottom:0.5rem;padding-bottom:0.5rem;border-bottom:1px solid #e8e8ee;";
 
       // Build header row with DOM methods to avoid encoding issues with triangle chars
       const header = document.createElement("div");
@@ -910,7 +963,7 @@
 
       const toggleIcon = document.createElement("span");
       toggleIcon.className = "esw-toggle-icon";
-      toggleIcon.style.cssText = "color:#706e6b;margin-right:0.5rem;";
+      toggleIcon.style.cssText = "color:#888;margin-right:0.5rem;";
       toggleIcon.textContent = "\u25B6"; // right-pointing triangle (collapsed)
 
       const tsSpan = document.createElement("span");
@@ -918,7 +971,7 @@
       tsSpan.textContent = "[" + timestamp + "]";
 
       const nameSpan = document.createElement("span");
-      nameSpan.style.color = "#c8c8e0";
+      nameSpan.style.cssText = "color:#1a1a2e;font-weight:600;";
       nameSpan.textContent = " " + eventName;
 
       header.appendChild(toggleIcon);
@@ -927,7 +980,16 @@
 
       const body = document.createElement("div");
       body.id = entryId;
-      body.style.cssText = "display:none;color:#706e6b;margin-left:1.5rem;margin-top:0.25rem;white-space:pre-wrap;";
+      body.style.cssText = [
+        "display:none",
+        "color:#333344",
+        "margin-left:1.5rem",
+        "margin-top:0.25rem",
+        "white-space:pre-wrap",
+        "word-break:break-word",
+        "overflow-wrap:anywhere",
+        "line-height:1.5"
+      ].join(";");
       body.textContent = detailStr;
 
       header.addEventListener("click", function () {
